@@ -1,6 +1,6 @@
 # Combat
 
-Related rules: [status effects](effects.md), [attributes and resources](attributes.md), [Scaling](scaling.md), [Fighting Styles](fighting-styles.md), and [equipment](equipment.md).
+Related rules: [status effects](effects.md), [attributes and resources](attributes.md), [Scaling](scaling.md), [Fighting Styles](fighting-styles.md), and [equipment](equipment.md). The shared deterministic arithmetic and modifier structure is planned in [Numeric Design](../dev/numeric-design.md).
 
 ## Critical Damage
 

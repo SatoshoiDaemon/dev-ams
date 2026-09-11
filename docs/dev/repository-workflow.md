@@ -4,7 +4,7 @@
 
 `dev-ams` contains engine development and initial design documentation. `ams` is the public distribution and contribution repository. `wiki-ams` documents systems for players and modders. Each is an independent repository using `main` as its initial branch.
 
-The initial setup is local. No remote address, hosted repository visibility, branch protection, release, or remote publication has been configured. Configure the intended remotes when the hosting locations are known.
+The `dev-ams` repository tracks `git@github.com:Axiom-1337-ts/dev-ams.git` as `origin`, with `main` published as its upstream branch. Hosted repository visibility and branch protection are outside this local setup. The separate public and wiki repositories still require their own remotes.
 
 ## Current checks
 

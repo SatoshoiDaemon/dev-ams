@@ -1,6 +1,6 @@
 # Status Effects
 
-This is the complete initial Status Effect specification, including the shared status material formerly repeated in the Glyph notes. [Glyphs](glyphs.md) and other systems consume this model. Individual effect definitions, examples, the canonical table, and the summary are retained together for reference.
+This is the complete initial Status Effect specification, including the shared status material formerly repeated in the Glyph notes. [Glyphs](glyphs.md) and other systems consume this model. Individual effect definitions, examples, the canonical table, and the summary are retained together for reference. Shared numeric representation and validation requirements are planned in [Numeric Design](../dev/numeric-design.md), with the remaining per-effect work tracked in [Status Numeric Planning](../dev/status-balance.md).
 
 ## Status Effect System
 

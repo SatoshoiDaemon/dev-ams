@@ -1,6 +1,6 @@
 # Magic Nodes and Glyphs
 
-This document preserves the initial magic Node and Glyph design proposals. It defines a vocabulary and a catalog of proposed behaviors; illustrative values are not complete balancing formulas. Equipment-specific behavior is documented in [Equipment Sigils](sigils.md). The authoritative rules for Counter, Potency, status competition, status events, and individual effects are in [Status Effects](effects.md).
+This document preserves the initial magic Node and Glyph design proposals. It defines a vocabulary and a catalog of proposed behaviors; illustrative values are not complete balancing formulas. Equipment-specific behavior is documented in [Equipment Sigils](sigils.md). The authoritative rules for Counter, Potency, status competition, status events, and individual effects are in [Status Effects](effects.md). The first candidate Weight, Status Budget, and numeric-card structure is documented in [Glyph Numeric Planning](../dev/glyph-balance.md).
 
 ## General Magic Node Grammar
 
@@ -458,4 +458,3 @@ These proposals preserve the original examples without defining missing mechanic
 - Turn, action, decay, and trigger timing must be integrated with the canonical combat and status systems. The Node grammar's proposed trigger labels do not define new event API contracts by themselves.
 - Elemental Glyphs intentionally propose changes to normal status behavior; their exact scope, limits, and interaction with competition remain to be defined. No unspecified stacking, direct-HP bypass, or additional status property is implied beyond each stated proposal.
 - The Focus example places `Fire` under `Damage`, while the general grammar describes an Elemental Type branch. Both source examples are preserved; their exact graph representation needs a single consistent schema.
-

@@ -18,7 +18,7 @@ Read [AGENTS.md](AGENTS.md) for the project's architectural requirements and [CO
 | `ams` | Public distribution, release information, issues, and contributions. |
 | `wiki-ams` | Player and modder documentation for game systems and the modding API. |
 
-Each directory is an independent Git repository. Remote repository addresses have not been configured.
+Each directory is an independent Git repository. This repository tracks `git@github.com:Axiom-1337-ts/dev-ams.git` as `origin`; the public and wiki repositories require their own remotes.
 
 ## Runtime requirements
 

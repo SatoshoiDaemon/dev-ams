@@ -55,6 +55,10 @@ The [world index](../world/README.md) is the shorter navigation page. The [NPC a
 
 ## Development Material
 
+- [Numeric Design Framework](numeric-design.md): deterministic units, rounding, modifier operations, status contracts, and approval states.
+- [Numeric Coverage Audit](numeric-audit.md): numeric completeness, missing formulas, and planning priority for every system family.
+- [Status Numeric Planning](status-balance.md): per-effect numeric gaps, lifecycle requirements, resistance curve candidate, and test matrix.
+- [Glyph Numeric Planning](glyph-balance.md): candidate Weight and Status Budget equations plus the numeric-card requirements for all Glyphs.
 - [System Design Principles](system-design.md): configuration, modding, persistence, diagnostics, separation, testing, and priorities.
 - [Repository Workflow](repository-workflow.md): repository roles, documentation checks, and future Windows/Linux/musl builds.
 - [Systems Migration](systems-migration.md): complete mapping for the former `SYSTEMS.md`.
@@ -70,7 +74,7 @@ The separate `ams` public/distribution repository contains its README, contribut
 
 The separate `wiki-ams` repository contains its README, contribution guide, MIT license, wiki index, documentation workflow, and checker.
 
-All three directories are independent Git repositories on `main`. No remote addresses or initial commits were created during this setup.
+All three directories are independent Git repositories on `main`. `dev-ams` has an initial commit and tracks `git@github.com:Axiom-1337-ts/dev-ams.git`; remote addresses and initial commits for the public and wiki repositories remain separate work.
 
 ## Open Decisions
 
@@ -79,5 +83,5 @@ All three directories are independent Git repositories on `main`. No remote addr
 - Define how potion Duration maps to Status Effect Counter.
 - Specify the combat opening condition, Bonus Action nesting, and fleeing rules.
 - Complete unspecified effect decay, damage-type, and replacement interactions.
-- Define Glyph Weight and status-budget equations and settle the remaining Node grammar mismatches.
+- Approve or replace the candidate Glyph Weight and status-budget equations and settle the remaining Node grammar mismatches.
 - Decide module, data-schema, save-version, mod-manifest, and Lua API boundaries before implementation scaffolding.

@@ -45,6 +45,10 @@ The [NPC documentation area](npc/README.md) is reserved for dedicated character 
 ## Development and Migration
 
 - [Planning inventory](dev/planning-inventory.md): catalog of preserved systems, world material, repository assets, and open decisions for the next planning stage.
+- [Numeric design framework](dev/numeric-design.md): deterministic units, rounding, modifiers, status contracts, curve primitives, and test requirements.
+- [Numeric coverage audit](dev/numeric-audit.md): completeness and priority matrix for gameplay, endgame, and world systems.
+- [Status numeric planning](dev/status-balance.md): per-effect lifecycle, caps, missing formulas, resistance-curve candidate, and cross-status tests.
+- [Glyph numeric planning](dev/glyph-balance.md): candidate Weight and Status Budget equations, Glyph cost classes, numeric cards, and bounded trigger rules.
 - [System design principles](dev/system-design.md): configuration, modding, persistence, logging, separation, testing, and implementation order.
 - [Repository workflow](dev/repository-workflow.md): repository roles, documentation CI, and future Windows/Linux build requirements.
 - [Systems migration record](dev/systems-migration.md): source sections and line ranges for the former root `SYSTEMS.md`.
