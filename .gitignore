@@ -1,0 +1,26 @@
+# Rust build output. Cargo.lock should be tracked for the game application.
+/target/
+
+# Local game sessions and generated distribution output.
+/logs/
+/saves/
+/dist/
+
+# Local editor and operating-system files.
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+
+# Contributor tooling.
+__pycache__/
+*.py[cod]
+.venv/
+
+# Local credentials, if contributor tooling uses them.
+.env
+.env.*
+!.env.example
