@@ -85,10 +85,6 @@ The proposed distinction is by weight class rather than individual armor piece.
 
 Robe should have a richer identity than simply "armor with low defense and INT +10."
 
-## Historical Open Design Details
-
-The source did not originally define the numeric strengths, resource limits, mark behavior, exact switching timing, or ownership rules. Those gaps are resolved below.
-
 ## Canonical Quantified Sigil Contract
 
 Every Sigil stores `owner_id`, `item_id`, `trigger_event`, `effect`, `potency`, `counter`, `cooldown`, `activation_limit`, and `status_packet` fields. A Sigil activates at most once per matching event, has a default cooldown of `0`, and cannot recursively activate itself. Equipment triggers use the event names `OnAttackReceived`, `OnDamageReceived`, `OnHPDamage`, `OnTenacityDamage`, `OnShieldDamage`, and `OnHPBelow`, plus the catalog events On Hit, On Critical, On Block, On Parry, On Dodge, On Kill, and While Equipped. Status effects are applied only through the shared StatusPacket contract; a Sigil never creates an unregistered anonymous effect.

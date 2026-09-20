@@ -1781,9 +1781,6 @@ The generic engine must support these differences.
 
 Do not normalize every Status Effect into the same `Potency + Duration - 1 per turn` model.
 
-## Historical Unresolved Effect Details
-
-The original source left Curse's second modifier, several decay events, Bleed's damage type, and Poison replacement behavior unresolved. Those gaps are resolved by the canonical status lifecycle and Glyph/Status integration sections above; this paragraph is retained as provenance.
 ## Canonical Glyph/Status Integration Contract
 
 This section is the required bridge between Glyphs and Status Effects. A Glyph never creates an anonymous temporary modifier when the behavior has Potency, Counter, a source, a removal event, or a decay event. It must either modify the status being applied or apply a registered Status Effect ID.

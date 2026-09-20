@@ -452,17 +452,6 @@ SIGIL
 "How does a piece of equipment behave in a special way?"
 ```
 
-## Historical Open Design Details
-
-The following bullets describe gaps that existed before the canonical quantified specification. They are retained for provenance only; the section below resolves them.
-
-These proposals preserve the original examples without defining missing mechanics:
-
-- The status budget, Weight calculation, conversion rates, and Glyph efficiencies are not specified. For example, the preserved `20/20 → 35/8` conversion does not establish a rule that Counter plus Potency must remain numerically constant. The displayed Weights `18` and `31` are illustrative.
-- Turn, action, decay, and trigger timing must be integrated with the canonical combat and status systems. The Node grammar's proposed trigger labels do not define new event API contracts by themselves.
-- Elemental Glyphs intentionally propose changes to normal status behavior; their exact scope, limits, and interaction with competition remain to be defined. No unspecified stacking, direct-HP bypass, or additional status property is implied beyond each stated proposal.
-- The Focus example places `Fire` under `Damage`, while the general grammar describes an Elemental Type branch. Both source examples are preserved; their exact graph representation needs a single consistent schema.
-
 ## Canonical Quantified Specification
 
 This section closes the numerical gaps above. It is deliberately conservative: a Glyph changes an existing operation and never creates an unbounded resource loop.

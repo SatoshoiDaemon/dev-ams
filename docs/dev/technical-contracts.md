@@ -41,16 +41,38 @@ mod, file, object ID, field, received value, and reason
 
 Invalid content is rejected without a panic. One invalid mod should not make unrelated base content uninspectable, but the load result must clearly identify that the mod was not loaded completely.
 
-## Mod manifest and load order
+## Mod structure, manifest, and load order
 
-Every mod has a manifest with at least:
+Mods use a deliberately simple visible directory structure:
 
-```toml
-id = "author:example"
-name = "Example Mod"
-version = "1.0.0"
-api_version = 1
+```text
+/mods/
+    example_mod/
+        manifest.json
+        content/
+            items.json
+            weapons.json
+            spells.json
+        scripts/
+            main.lua
 ```
+
+`content/` and `scripts/` are optional independently. A JSON-only mod is valid;
+Lua is required only when the mod adds behavior that declarative data cannot
+express. JSON defines content and Lua defines behavior.
+
+Every mod has a `manifest.json` with at least:
+
+```json
+{
+  "id": "author:example",
+  "name": "Example Mod",
+  "version": "1.0.0",
+  "api_version": 1
+}
+```
+
+The manifest file format is JSON.
 
 Dependencies may be declared by stable ID. Loading is deterministic:
 
@@ -64,7 +86,26 @@ engine primitives
 
 Missing dependencies, dependency cycles, invalid manifests, and duplicate IDs are load errors. A mod may replace existing content only through an explicit replacement declaration; ordinary registration cannot silently overwrite another ID.
 
-## Saves and migrations
+## Save ownership and migrations
+
+Save files are player-owned data. Manual editing is a supported use case. The
+engine validates whether data can be safely interpreted and executed; it does not
+validate whether values are legitimate, reachable, balanced, or obtainable through
+normal play.
+
+The engine MUST NOT:
+
+- encrypt saves;
+- sign saves;
+- prevent manual modification;
+- reject a save merely because its values were externally edited;
+- enforce gameplay legitimacy or anti-cheat rules.
+
+For example, an externally edited `strength: 999999999` is not corruption merely
+because it is unusually large. It is accepted if it is structurally representable
+and safe for the current ruleset. Structural failures, malformed JSON, unsupported
+schema versions, impossible archive contents, integer overflow, or data that cannot
+be safely interpreted may still be rejected with an actionable diagnostic.
 
 Every save records at least:
 
@@ -77,9 +118,31 @@ Every save records at least:
 
 `save_format_version` describes serialized structure. `ruleset_version` identifies the gameplay defaults used to interpret it. Modded saves also record the required mod IDs and versions when that information is needed to load their content.
 
-Loading runs migrations in version order. A migration may rename fields or IDs, add defaults, and emit a warning. A save is rejected only when it cannot be made safe to load; the diagnostic identifies the save, version, field, and reason. Save data remains human-readable and editable.
+Loading runs migrations in version order. A migration may rename fields or IDs, add
+defaults, and emit a warning. A save is rejected only when it cannot be made safe to
+load; the diagnostic identifies the save, version, field, and reason. Save data
+remains human-readable and editable.
 
-## Lua boundary
+Unknown mod-owned data MUST be preserved as opaque JSON. The engine does not
+interpret, semantically validate, or discard it, and writes it back when the save is
+written again. If a mod is unavailable, the loader preserves that mod's namespace,
+emits a warning, and continues unless a required live reference prevents the
+affected operation from being safely loaded.
+
+Unknown data and unresolved live references are distinct:
+
+- an opaque mod subtree may remain untouched while its owner is unavailable;
+- a reference such as `krieg_weapons:moonlight_greatsword` must be represented as
+  an `UnresolvedContentReference` with its ID and owner namespace;
+- the owning system decides whether that unresolved reference blocks the specific
+  operation, such as equipping or using the item;
+- an absent mod does not automatically invalidate the entire save.
+
+When the mod becomes available again, its namespace data is handed back to that mod
+and the mod/API may validate its own semantics. Opaque data is therefore preserved
+for round trips, not silently accepted as active gameplay state.
+
+## Lua boundary and API version 1
 
 Lua accesses the game only through the versioned mod API:
 
@@ -87,7 +150,46 @@ Lua accesses the game only through the versioned mod API:
 mod_api_version = 1
 ```
 
-The API exposes stable IDs, documented value objects, registration functions, and event callbacks. It does not expose Rust internals, arbitrary filesystem access, process execution, shell commands, native libraries, or implicit operating-system access.
+API version 1 intentionally starts small and grows with implemented systems. It has
+four capabilities:
+
+```text
+Registration
+Query
+Mutation
+Events
+```
+
+The initial conceptual operations are:
+
+```text
+api.register_action(...)
+api.register_status(...)
+
+api.get_entity(id)
+api.get_attribute(entity, attribute)
+api.get_resource(entity, resource)
+api.has_status(entity, status)
+
+api.damage(...)
+api.heal(...)
+api.change_resource(...)
+api.apply_status(...)
+api.remove_status(...)
+
+api.on("OnDamageReceived", callback)
+api.on("OnKill", callback)
+```
+
+The exact payload schemas are defined alongside the owning implemented system. API
+version 1 does not attempt to publish Fishing, Mining, Abyss, Companions, Alchemy,
+or every other future system in advance. New system surfaces are added deliberately
+in a later API version when those systems become executable.
+
+The API exposes stable IDs, documented value objects, registration functions, and
+event callbacks. It does not expose Rust internals, arbitrary filesystem access,
+process execution, shell commands, native libraries, network access, or implicit
+operating-system access.
 
 A Lua error identifies the mod, script, line, callback/event, and reason. The failing callback is disabled or the affected operation is rejected according to the owning system; the whole game must not crash because of an ordinary mod error. Callback recursion remains subject to the combat/event safety limits.
 
@@ -167,12 +269,126 @@ ruleset version and RNG seed/stream when randomness was used
 
 Absorbed, skipped, rejected, or inapplicable stages are represented explicitly rather than silently omitted. A future aggregate `explain turn` command may summarize multiple actions; it is distinct from `explain last`.
 
+## Closed implementation contracts
+
+The following decisions are canonical and no longer open design questions:
+
+- [Fleeing](../systems/combat.md#fleeing) ends combat immediately, grants no combat
+  rewards, and has no chance, cost, cooldown, reaction, or encounter exception.
+- Module dependency direction is `terminal → app → systems → engine`; content,
+  persistence, and modding enter through interfaces. Terminal never owns gameplay
+  rules, persistence does not decide gameplay, content describes data, systems
+  execute rules, and Lua receives no arbitrary Rust references.
+- JSON defines declarative content. Lua defines behavior that JSON cannot express.
+  Mods may contain content without `scripts/`, and API version 1 starts with the
+  four capabilities Registration, Query, Mutation, and Events.
+- Unknown mod-owned save data is preserved as opaque JSON. Unavailable mods produce
+  warnings and unresolved references rather than automatic whole-save rejection.
+- Deterministic behavior is tested with the same state, action, RNG seed, ruleset,
+  and mods producing the same result and `explain last` trace.
+
+These are implementation contracts, not requests for additional endgame or content
+design.
+
 ## Remaining open technical contracts
 
-The following are not resolved by this page:
+The following items remain to be closed before the corresponding implementation
+area is considered stable.
 
-- fleeing and encounter-specific escape conditions;
-- the complete module boundary between engine, data, persistence, terminal presentation, and modding;
-- whether a particular system needs to preserve mod-owned unknown save fields during migration;
-- final Lua API operation lists for each gameplay system;
-- implementation tests and balance validation for the canonical numeric values.
+### Action-specific validation
+
+`TargetSpec` defines who may be selected, but each action still needs a declarative
+validation contract for requirements that are not targeting itself. Before payment,
+an action definition must be able to state, where applicable:
+
+- required and forbidden actor states, statuses, equipment, weapon, catalyst, or
+  Fighting Style;
+- required resources and the exact payment timing;
+- whether the action is available in exploration, combat, or both;
+- whether it is offensive, blockable, interruptible, or allowed as a Bonus Action;
+- required element ownership, node, learned stable ID, or spell preparation;
+- target filters such as status, boss, HP threshold, or relation.
+
+The contract must also specify validation timing: declaration validation happens
+before AP/resource payment, and resolution validation happens again after earlier
+actions may have changed the state. Invalid actions need a typed rejection reason
+and must not partially pay AP, resources, or item costs. The remaining work is to
+define the initial `ActionRequirement` vocabulary and rejection codes; the engine
+should make the vocabulary extensible rather than encode every action in a match.
+
+### Module boundaries and concrete interfaces
+
+The dependency direction is closed. The remaining implementation work is to express
+it in Rust module interfaces. The minimum boundary is:
+
+```text
+terminal ─> app ─> systems ─> engine/state
+                    ↑          ↑
+             content/data   persistence/modding
+                    └──── interfaces ────┘
+```
+
+The following ownership must be explicit:
+
+- `engine/state`: entity IDs, world state, resources, clocks, RNG, and generic
+  state transitions;
+- `systems/combat`: actions, turns, queues, damage pipeline, status processing,
+  combat outcomes, and combat results;
+- `content/data`: schemas, registries, validation, load order, and definitions;
+- `persistence`: save archives, migrations, and ruleset/mod metadata;
+- `modding/Lua`: versioned registration and callbacks through controlled handles;
+- `terminal`: input and rendering only; it must not decide game rules;
+- `app`: startup, mode transitions, command routing, and dependency composition.
+
+The concrete Rust crate/module layout and public function/trait signatures may be
+chosen as implementation begins. Systems must depend on engine contracts, not on
+terminal types. This does not require designing a perfect architecture before the
+first vertical slice.
+
+### Lua API payloads and expansion
+
+The minimum Lua API surface is closed as API version 1. The remaining work is to
+define payload schemas and add system-specific operations only when those systems
+become executable:
+
+- mod metadata and `mod_api_version` negotiation;
+- registration of content definitions and stable IDs;
+- event subscription and deterministic callback ordering;
+- read-only entity, attribute, resource, status, equipment, and world queries;
+- controlled mutations such as applying/removing statuses, damage, healing,
+  resource changes, and registering actions;
+- callback failure behavior, instruction/time limits, recursion limits, and event
+  limits;
+- value conversion rules between Lua and engine integers/enums/IDs.
+
+The API continues to omit filesystem, process, shell, native-library, network, and
+arbitrary Rust access.
+
+### Save archive layout
+
+Save ownership and opaque mod-data preservation are closed. The remaining concrete
+persistence decision is the first internal ZIP layout, for example which entries
+hold `character.json`, `world.json`, inventory, effects, metadata, and opaque mod
+namespaces. The layout must remain human-readable, editable, and versioned; it does
+not need to anticipate every future system.
+
+### Tests and balance validation
+
+These are not design blockers, but they are completion requirements. Canonical
+numeric values need executable regression vectors, while balance tuning may continue
+through ruleset versions after the engine exists. Tests must cover formulas,
+pipeline/event ordering, invalid external data, Lua failure isolation, save
+round-trips, and the `Fled` result. Deterministic systems must also satisfy:
+
+```text
+same state
++ same action
++ same RNG seed
++ same ruleset
++ same mods
+= same result and explain last trace
+```
+
+Regression tests should assert important explanation fields, not only final totals;
+for example, scaling contributions, Shield damage, Tenacity damage, HP damage, event
+order, and rejection reasons.

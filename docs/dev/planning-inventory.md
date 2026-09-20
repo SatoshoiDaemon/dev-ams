@@ -74,12 +74,19 @@ All three directories are independent Git repositories on `main`. `dev-ams` has 
 
 ## Open Decisions
 
-- Specify the remaining fleeing rules and encounter-specific escape conditions.
-- Complete implementation-level validation for action-specific requirements not covered by the canonical Targeting contract.
-- Decide the remaining module boundaries and implement the technical contracts in [Technical Contracts](technical-contracts.md).
+- Complete the initial `ActionRequirement` vocabulary and typed rejection codes for
+  action-specific validation beyond the canonical Targeting contract.
+- Define the internal save ZIP entry layout and implement the first migration/round
+  trip tests. The ownership and unknown mod-data policy is now canonical.
+- Define concrete Rust interfaces as implementation begins. The dependency direction,
+  module ownership, JSON/Lua split, and minimal Lua API v1 are now canonical.
 
 ## Deferred Specifications
 
 The following are intentionally deferred content specifications, not current architectural gaps: Fishing timing and tables; Mining yields and resource respawn; Trial, Arena, Shrine, Cataclysm, Abyss, and Honor of the King tuning; regional encounter weights; environmental hazard schedules; resource distribution; and enemy/content progression. They become implementation requirements when their respective content is being built, unless another active system depends on them earlier.
 
 The former Spirit/Intelligence, Curse, potion Duration/Counter, combat opening, Bonus Action, status lifecycle, and Glyph budget decisions are canonicalized in the relevant system documents and [Numeric Specification Baseline](numeric-specification-baseline.md). They are no longer open design questions, although their implementation and balance tests remain outstanding.
+
+The save ownership philosophy, opaque preservation of unknown mod-owned data, simple
+optional-Lua mod structure, minimal Lua API v1, and deterministic regression-testing
+requirements are canonicalized in [Technical Contracts](technical-contracts.md).

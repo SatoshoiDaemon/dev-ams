@@ -92,82 +92,6 @@ This means a player may choose a powerful but slow action and then discover that
 
 The engine should preserve declared actions as explicit combat objects rather than immediately executing each declaration.
 
-## Priority
-
-Priority determines action resolution order.
-
-Priority may be influenced by:
-
-- Dexterity
-- Haste
-- Exhaust
-- Equipment Weight
-- Spell Cast Time
-- Action Weight
-- Equipment Modifiers
-- Effects
-- Fighting Styles
-- Nodes
-
-The exact numerical formula should be configurable.
-
-Conceptually:
-
-```text
-Base Priority
-+
-Dexterity Contribution
-+
-Haste
--
-Exhaust
--
-Action Cost
--
-Cast Time
--
-Weight
-+
-Other Modifiers
-=
-Final Priority
-```
-
-This is illustrative, not the final required formula.
-
-## Priority as a Build Mechanic
-
-Priority is not merely a hidden initiative roll.
-
-It is an active gameplay mechanic.
-
-Powerful abilities may deliberately carry Priority penalties.
-
-For example:
-
-```text
-Prepare devastating spell
-↓
-High cast weight
-↓
-Low Priority
-↓
-Action resolves near the end of the round
-```
-
-Players may build around:
-
-- acting early
-- interrupting slow enemies
-- accepting slow actions for extreme damage
-- Haste
-- reducing equipment penalties
-- increasing Dexterity
-
-Avoid randomizing action order unnecessarily.
-
-Priority should be explainable.
-
 ## Independent Combat Actors
 
 Every entity with its own active actions receives its own combat turn/action declaration.
@@ -314,18 +238,22 @@ The engine should maintain explicit trigger/action depth safeguards.
 
 Fleeing is a legitimate combat action.
 
-The exact success conditions are not yet defined.
+Fleeing has no success roll or additional escape system in the base combat rules.
 
-Do not invent an arbitrary universal flee percentage.
+When the player selects `Flee`:
 
-The system should allow flee behavior to depend on factors such as:
+1. the current combat ends immediately;
+2. the player receives no rewards from that combat, including experience, currency,
+   items, or other combat-completion rewards;
+3. no victory, kill, or combat-completion event is emitted;
+4. the game returns to the applicable non-combat state.
 
-- encounter
-- enemy
-- Priority
-- effects
-- environment
-- special rules
+Fleeing does not enter the damage pipeline, does not require a target, and does not
+consume a normal combat action. The base game does not add encounter-specific escape
+conditions, a universal flee percentage, a cost, a cooldown, or a failure chance.
+
+The combat result must identify the outcome as `Fled` so that exploration state,
+logs, and `explain last` can distinguish it from `Victory`, `Defeat`, and `Aborted`.
 
 ## End-of-Round Processing
 
@@ -400,10 +328,6 @@ Resolution Order:
 ```
 
 Priority should not behave like an unexplained hidden dice roll.
-
-## Historical Unresolved Timing Details
-
-The original source left the opening advantage, action queue, Bonus Action limits, and flee behavior incomplete. Those gaps are resolved by the canonical contract below. This heading and the earlier illustrative examples are retained as provenance.
 
 ## Canonical Quantified Combat Contract
 

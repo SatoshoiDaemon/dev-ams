@@ -2,7 +2,7 @@
 
 > **Specification status:** The canonical section at the end is normative and defines every attribute calculation, cap, allocation, migration, and test value. Earlier text is historical where it conflicts.
 
-> **Historical source note:** The original draft called the magical offensive attribute Spirit. The canonical contract below resolves this as `Intelligence`; the old Spirit text is retained only as migration provenance.
+> **Migration note:** `spirit` is a legacy save-data alias for the canonical `intelligence` attribute. It is not a current gameplay attribute.
 
 ## Core Attributes
 
@@ -92,26 +92,6 @@ Precision generates Power.
 Base relationship:
 
 1 Precision = 7 Precision Power
-
-## Historical Spirit Draft
-
-The original draft assigned magical offensive power to Spirit.
-
-It affects:
-
-- magic damage
-- magical Scaling
-- potential magic-related requirements
-
-Spirit generates Power.
-
-Base relationship:
-
-1 Spirit = 7 Spirit Power
-
-Do not automatically make Spirit responsible for every magical subsystem.
-
-Mana capacity and Node complexity remain separate mechanics.
 
 ## Mana
 

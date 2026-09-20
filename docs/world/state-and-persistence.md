@@ -1,5 +1,10 @@
 # World State, Campaign Changes, and Save Compatibility
 
+> **Canonical save philosophy:** Save files are player-owned data. Manual editing
+> of JSON inside a save ZIP is supported. The engine checks structural safety, not
+> gameplay legitimacy. The shared ownership, migration, and opaque mod-data rules
+> are defined in [Technical Contracts](../dev/technical-contracts.md#save-ownership-and-migrations).
+
 ## World State
 
 Regions must support persistent world state.
@@ -101,4 +106,9 @@ more resilient to content changes
 mod-friendly
 ```
 
-Unknown modded regions or routes should generate useful diagnostics rather than unexplained crashes.
+Unknown modded regions or routes should generate useful diagnostics rather than
+unexplained crashes. If they are mod-owned save data, their opaque JSON must be
+preserved. If an active world state references an unavailable content ID, represent
+it as an unresolved reference and let the owning world operation decide whether
+that particular operation can continue; do not automatically invalidate the whole
+save.

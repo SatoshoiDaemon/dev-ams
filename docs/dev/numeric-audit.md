@@ -17,7 +17,7 @@ This is a status document, not an authority over system pages. The latest canoni
 | --- | --- | --- | --- |
 | Attributes and resources | Base conversions, Intelligence identity, resource bases, regeneration, and debuff reduction are defined. | Implementation tests; secondary behavior can remain content/balance work | P1 |
 | Scaling | Grade multipliers, single/multiple contributions, floor points, and pre-mitigation placement are defined. | Content-specific combinations and exceptional-grade availability are deferred until content needs them | P2 |
-| Combat damage | Pipeline, floor rounding, shared Defense, typed penetration, Shield order, Tenacity split, AP, Cast, Priority, Accuracy, Evasion, Parry, and Block are defined. | Fleeing rules and implementation tests | P1 |
+| Combat damage | Pipeline, floor rounding, shared Defense, typed penetration, Shield order, Tenacity split, AP, Cast, Priority, Accuracy, Evasion, Parry, Block, and Fleeing are defined. | Implementation tests | P1 |
 | Status effects | Potency/Counter model, default caps, competition, decay, damage types, Curse, Poison replacement, and resistance curve are defined. | Implementation tests and balance tuning | P1 |
 | Glyphs | Canonical quantified specification now exists for all catalogued Glyphs, including Weight, status budget, limits, timing, cooldowns, validation, and test vectors. | Balance tuning may change versioned defaults; no implementation-blocking numeric gap remains. | Completed/P0 |
 | Sigils | Canonical triggers, magnitudes, reserves, marks, switching, cooldowns, ownership, and event mapping are defined. | Implementation tests and balance tuning | P1 |
@@ -60,15 +60,13 @@ This is a status document, not an authority over system pages. The latest canoni
 
 ## Recommended Planning Order
 
-The original audit below is preserved as historical sequencing. The current implementation baseline is [Numeric Specification Baseline](numeric-specification-baseline.md), and the current Glyph contract is [Canonical Quantified Specification](../systems/glyphs.md#canonical-quantified-specification).
+The current implementation baseline is [Numeric Specification Baseline](numeric-specification-baseline.md), and the current Glyph contract is [Canonical Quantified Specification](../systems/glyphs.md#canonical-quantified-specification).
 
 1. Implement and test the canonical combat contract, including AttackContext, DamageContext, AP, Cast, Priority, Accuracy, Evasion, Parry, Block, shared Defense, Shield, and event ordering.
 2. Connect equipment, spell, catalyst, Glyph, and Fighting Style Scaling through declared data sources.
-3. Define and test fleeing rules plus remaining action-target validation rules.
+3. Define and test remaining action-target validation rules.
 4. Implement and test progression, direct recipes, alchemy, simple currency, gathering, and companion rules from their canonical pages.
 5. Implement deferred content specifications only when the corresponding content enters development.
-
-The earlier eight-step list is preserved by the canonical system documents and is no longer an unresolved planning sequence.
 
 ## Definition of Numerically Planned
 

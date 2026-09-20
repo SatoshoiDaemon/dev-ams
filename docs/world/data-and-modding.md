@@ -1,5 +1,10 @@
 # World Data and Modding
 
+> **Canonical data/mod boundary:** JSON defines declarative content. Embedded Lua
+> defines behavior that JSON cannot express. A mod may be JSON-only; `scripts/` is
+> optional. The visible mod layout and API versioning rules are defined in
+> [Technical Contracts](../dev/technical-contracts.md#mod-structure-manifest-and-load-order).
+
 ## World Data
 
 Regions should be data-driven whenever practical.
@@ -76,6 +81,11 @@ regional state transitions
 ```
 
 Lua should be capable of controlling dynamic behavior.
+
+Lua is not required for content that can be represented declaratively. A mod adding
+an item, weapon, spell, or other data-defined object should be able to provide JSON
+without calling a Lua registration function. Lua is reserved for dynamic behavior,
+callbacks, custom actions, and other logic that cannot reasonably be data.
 
 Example conceptual API:
 
