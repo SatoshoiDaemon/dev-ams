@@ -32,4 +32,4 @@ Build checks and release packaging must demonstrate these properties before a pl
 
 Keep one Markdown file per independent system, grouping the internal mechanics of that system together. Use English, relative repository-local links, stable content identifiers, and explicit proposal/open-question labels. Update the documentation index when adding or moving a page.
 
-The migration records document the source locations of the initial specifications. Source file names in those records are historical references, not instructions to recreate the monolithic files.
+The current system and world documents are the readable specification. Historical source files and removed monolithic drafts are not part of the active documentation set.

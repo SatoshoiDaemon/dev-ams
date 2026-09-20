@@ -1,6 +1,6 @@
 # System Design Principles
 
-These are initial development requirements and design intentions, not a claim that every system is implemented. System-specific rules live in the [systems directory](../systems/). The source uses Spirit in some diagrams; see the unresolved naming decision in [attributes](../systems/attributes.md).
+These are initial development requirements and design intentions, not a claim that every system is implemented. System-specific rules live in the [systems directory](../systems/). The canonical rules are defined by sections and pages marked **Canonical**; proposal and historical text never overrides them.
 
 ## Purpose
 
@@ -34,9 +34,9 @@ Important configurable examples include:
 - Tenacity per Resistance
 - Mana per Mana attribute
 - Power per offensive attribute
-- Evasion cap
-- Damage Reduction cap
-- diminishing-return curves
+- Evasion behavior, when a specific mechanic requires a limit
+- Damage Reduction behavior, when a specific mechanic requires a limit
+- diminishing-return curves, only when required by their owning mechanic
 - quick potion slots
 - weapon-ready slots
 - Fighting Style slots
@@ -46,6 +46,8 @@ Important configurable examples include:
 - Alchemy success curves
 - Fishing timing windows
 - Abyss scaling
+
+Balance is not a default architectural requirement. Do not add hard caps, soft caps, diminishing returns, progression ceilings, or arbitrary numeric limits solely for balance. Limits are valid when required by the mechanic itself, by data safety, or by an explicit design decision. In particular, the engine does not impose a universal vertical or horizontal endgame progression cap; individual systems may have natural or structural limits.
 
 The base game provides canonical defaults.
 
@@ -141,7 +143,7 @@ Keep separate engine concepts separate.
 
 Examples:
 
-Spirit ≠ Mana
+Intelligence ≠ Mana
 
 HP ≠ Tenacity
 
@@ -187,7 +189,7 @@ A new spell should consider:
 - Elements
 - Nodes
 - Mana
-- Spirit
+- Intelligence
 - Scaling
 - catalysts
 - spell weight
@@ -220,7 +222,7 @@ Character
 │   ├── Strength
 │   ├── Dexterity
 │   ├── Precision
-│   ├── Spirit
+│   ├── Intelligence
 │   └── Mana
 │
 ├── Resources

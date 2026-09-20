@@ -27,6 +27,11 @@ Directories:
 /ams - Production and public repository
 /wiki-ams - Wiki for modders and game systems
 
+## 0. Fundamental
+
+
+Do not invent complexity to close a specification. A system is not incomplete merely because it lacks costs, cooldowns, caps, restrictions, scaling rules, failure chances, progression limits, or balance mechanisms. These mechanics exist only when explicitly required by the design. Systems intentionally designed to be simple must be documented as simple rather than expanded to resemble conventional RPG systems.
+
 ## 1. Project Philosophy
 
 This project is an open-source, offline-first, terminal-rendered RPG written in Rust.

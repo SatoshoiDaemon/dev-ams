@@ -6,16 +6,16 @@ This page closes the most important non-Glyph gaps found by the numeric audit. T
 
 All gameplay quantities are signed 64-bit integers after each named stage. Fractions are floored, never rounded conventionally. A value below zero is clamped to zero unless a rule explicitly says it is a debt. Percentage modifiers use basis points (`10_000 = 100%`). Additive modifiers are applied before multiplicative modifiers; multiplicative modifiers are multiplied in declaration order, then floored once.
 
-Damage uses the existing stage order: Base, Equipment, Active Effects, Attributes, Offensive Modifiers, Defensive Modifiers, Damage Type, Shield, Tenacity, HP, On Damage triggers, On HP Change triggers, Death Check. Physical and Magical damage use the normal Shield/Tenacity path. True Damage bypasses Tenacity but still encounters Shield and then HP. While Tenacity is positive, applicable damage is split `50% HP / 50% Tenacity`; odd points go to HP. When Tenacity is zero, all applicable damage goes to HP.
+Damage is composed as `Base Damage + Scaling Contributions`, producing pre-modifier damage. It then follows: Offensive Modifiers, shared Defense/Defensive Modifiers, Damage Type, Block, Shield, Tenacity, HP, On Damage triggers, On HP Change triggers, Death Check. Equipment and Attributes provide sources for Base Damage, Scaling, and modifiers; they are not artificial damage stages. Physical and Magical damage use the normal Shield/Tenacity path. True Damage bypasses Defense and Tenacity but still encounters Block only when the action is blockable, then Shield and HP. While Tenacity is positive, applicable damage is split `50% HP / 50% Tenacity`; odd points go to HP. When Tenacity is zero, all applicable damage goes to HP.
 
-Defense and penetration are now defined:
+Shared Defense and penetration are now defined. Physical and Magical damage use the same Defense system; there is no separate core Magic Resistance attribute:
 
 ```text
-effective_defense = max(0, Defense - Armor_Penetration)
+effective_defense = max(0, Defense + conditional_defense[damage_type] - penetration[damage_type] - universal_penetration)
 defense_multiplier = 10_000 / (10_000 + effective_defense)
 ```
 
-The multiplier is floored after multiplication. `Defense` and `Armor_Penetration` are integer points; the curve has no hard immunity and cannot reduce damage below `1` when positive damage reaches the Defense stage.
+The multiplier is floored after multiplication. `Defense` and penetration are integer points; the curve has no hard immunity and cannot reduce damage below `1` when positive damage reaches the Defense stage. True Damage ignores Defense and penetration but still encounters Shield and then HP.
 
 ## Attributes and resources
 
@@ -29,13 +29,20 @@ final_counter = max(1, floor(base_counter × 1000 / (1000 + Resistance × 10)))
 
 This is applied once on application, before competition. Spirit is not a separate attribute; all magical offensive and spell-capacity behavior uses Intelligence. This resolves the former Spirit/Intelligence ambiguity without changing the seven documented core attributes.
 
-## Priority and action order
+## AP, Cast, Priority, and action order
 
 ```text
-Priority = 100 + 2 × Dexterity + equipment_priority + active_effect_priority
+AP maximum per actor turn = 100
+Standard action = 100 AP
+Quick action = 50 AP
+Free action = 0 AP
+Bonus Action = 50 AP unless explicitly overridden
+
+actor_priority = 100 + 2 × Dexterity
+final_priority = actor_priority + action_priority + equipment_priority + active_effect_priority
 ```
 
-The first action of a combat is granted to the player party once, regardless of Priority. Thereafter, the highest Priority actor acts; ties resolve by player party, then stable entity ID. A normal action costs `100` Action Points. A Bonus Action costs `50` and may insert only after its parent action. Maximum Bonus Action depth is `2`, maximum Bonus Actions per actor per round is `3`, and an actor cannot activate the same Bonus Action source twice in one parent action.
+AP does not accumulate and Priority is not AP. At combat start, the player's controlled group receives the first action opportunity; the player chooses which eligible controlled party member performs it. Thereafter, eligible actions resolve by highest Final Priority; ties resolve by player party, then stable entity ID. Cast is a round eligibility delay: `eligible_round = declared_round + Cast`. Cast actions cannot resolve before their eligible round. Maximum Bonus Action depth is `2`, maximum Bonus Actions per actor per round is `3`, and an actor cannot activate the same Bonus Action source twice in one parent action. Accuracy, Evasion, Parry, Block, Shield, and the shared Defense pipeline are defined in [Combat](../systems/combat.md#canonical-quantified-combat-contract).
 
 ## Status lifecycle
 
@@ -63,7 +70,11 @@ Armor exclusive defaults are: Untouched grants `+10%` next effect after one unda
 
 ## Crafting, economy, and gathering
 
-Crafting consumes `10` base material units for a normal item, `20` for heavy armor, and `15` for a two-handed weapon. Material quality is `1..5`; each quality level adds `10%` output budget. A failed craft has a `10%` base failure chance reduced by `2%` per relevant template mastery level, minimum `1%`; failure consumes `50%` of inputs, floored. Merchant prices use `base_value × (1 + 10% regional modifier) × (1 + 5% rarity)`, and buyback is `40%` of price. Mining nodes yield `1..3` units, respawn after `30` minutes, and tool tiers `1..5` gate ore tiers `1..5`.
+Crafting is a direct recipe operation. A recipe declares stable-ID inputs and stable-ID outputs; valid inputs produce the declared output. There is no generic crafting quality, output budget, failure, waste, or durability rule. A recipe may define a special exception explicitly, but the engine must not invent one.
+
+The economy is a simple game currency. Items and services use declared prices, and activities may award declared currency amounts. There is no generic inflation simulation, regional price model, or merchant-economy subsystem unless a content definition explicitly adds one.
+
+Mining nodes yield the amount declared by their node definition, and tool requirements are declared by the resource definition. No durability rule is implied by gathering.
 
 ## Completion rule
 

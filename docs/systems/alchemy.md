@@ -1,6 +1,6 @@
 # Alchemy and Dynamic Potions
 
-> **Terminology to resolve:** The source lists Intensity, Potency, and Duration as generated potion properties. Persistent Status Effects use only Potency and Counter, with no independent generic Duration property; see [status effects](effects.md). Potion metadata and its conversion into effects remain to be specified. The original potion property list is retained below.
+> **Specification status:** The canonical numeric contract is defined in [Numeric Specification Baseline](../dev/numeric-specification-baseline.md). Potion duration is represented by Status Effect Counter; there is no independent generic runtime Duration. Earlier terminology is retained as historical vocabulary only.
 
 ## Alchemy
 

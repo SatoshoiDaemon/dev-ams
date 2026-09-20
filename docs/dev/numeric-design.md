@@ -11,7 +11,9 @@ The numeric layer must be:
 - serializable in human-readable data;
 - usable by base content and mods through the same contracts;
 - resistant to accidental overflow and infinite trigger loops;
-- explicit about rounding, caps, stacking, and evaluation order.
+- explicit about rounding, stacking, and evaluation order. Limits are documented only when required by a mechanic, data safety, or an explicit design rule.
+
+Balance is not an architectural requirement. Do not introduce hard caps, soft caps, diminishing returns, progression ceilings, or arbitrary numeric limits solely to contain balance. A limit must be required by the mechanic itself, by data safety, or by an explicit design decision.
 
 ## Numeric Domains
 
@@ -91,18 +93,17 @@ floor and stage output
 
 This is a structural candidate. Individual mechanics may define another operation order, but the exception must be represented in data or code as an explicit engine primitive and must appear in logs.
 
-## Authoritative Damage Stages
+## Authoritative Damage Composition and Stages
 
 Numeric planning must preserve the established order:
 
 ```text
-Base
-Equipment
-Active Effects
-Attributes
+Base Damage + Scaling Contributions
+Equipment and Attributes as declared sources
 Offensive Modifiers
 Defensive Modifiers
 Damage Type
+Block
 Shield
 Tenacity
 HP
@@ -130,7 +131,7 @@ The following values are already defined and are not new proposals:
 | Competing status order | Potency first, Counter second |
 | Attribute enhancement sources | Maximum `4` per attribute |
 
-The unresolved Spirit/Intelligence naming decision must not change the `7 Power` conversion while it is being resolved.
+The canonical attribute ID is `intelligence`; legacy `spirit` save data migrates one-for-one to `intelligence`. The migration does not change the `7 Power` conversion.
 
 ## Status Numeric Contract
 

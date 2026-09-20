@@ -20,5 +20,3 @@ These documents preserve the initial world design for A Magic Sovereign. Provisi
 | The failed summoning premise | [Basic lore](lore.md) |
 
 Character rules are documented in [character creation](../systems/character-creation.md). The dedicated [fast travel system](../systems/fast-travel.md) describes the special travel mechanic alongside normal exploration and transportation.
-
-The [world migration record](../dev/world-migration.md) maps every source section to its dedicated document.

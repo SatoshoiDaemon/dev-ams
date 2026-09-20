@@ -42,20 +42,14 @@ Read [basic lore](world/lore.md) for the provisional failed-summoning premise. C
 
 The [NPC documentation area](npc/README.md) is reserved for dedicated character and faction specifications when those are defined.
 
-## Development and Migration
+## Development
 
 - [Planning inventory](dev/planning-inventory.md): catalog of preserved systems, world material, repository assets, and open decisions for the next planning stage.
 - [Numeric design framework](dev/numeric-design.md): deterministic units, rounding, modifiers, status contracts, curve primitives, and test requirements.
 - [Numeric coverage audit](dev/numeric-audit.md): completeness and priority matrix for gameplay, endgame, and world systems.
-- [Status numeric planning](dev/status-balance.md): per-effect lifecycle, caps, missing formulas, resistance-curve candidate, and cross-status tests.
-- [Glyph numeric planning](dev/glyph-balance.md): superseded planning record; the final implementation contract is in the canonical Glyph section.
 - [Numeric specification baseline](dev/numeric-specification-baseline.md): canonical combat, status, progression, alchemy, equipment, crafting, economy, and gathering defaults.
 - [System design principles](dev/system-design.md): configuration, modding, persistence, logging, separation, testing, and implementation order.
 - [Repository workflow](dev/repository-workflow.md): repository roles, documentation CI, and future Windows/Linux build requirements.
-- [Systems migration record](dev/systems-migration.md): source sections and line ranges for the former root `SYSTEMS.md`.
-- [World migration record](dev/world-migration.md): source sections and line ranges for the former root `WORLDS.MD`.
-- [Glyph migration record](dev/glyph-migration.md): translation and consolidation of the former `docs/GLYPH.md`.
-
-The migration records preserve provenance for the old monolithic files. Shared status definitions live in `systems/effects.md`; shared lore lives in `world/lore.md`. The folder previously named `systens` is standardized as `systems`.
+Shared status definitions live in `systems/effects.md`; shared lore lives in `world/lore.md`. The folder previously named `systens` is standardized as `systems`.
 
 The former unresolved Spirit versus Intelligence, Curse, potion Duration versus Counter, core combat timing, and Glyph budget questions are resolved by [Numeric Specification Baseline](dev/numeric-specification-baseline.md) and the canonical Glyph section. Lower-priority content pages may still require authored encounter tables, but they no longer block implementation of the core rules.

@@ -1,6 +1,6 @@
 # Transportation
 
-Region connections may specify transportation requirements.
+Transportation is Fast Travel between specific regions or destinations.
 
 Current known example:
 
@@ -8,7 +8,7 @@ Current known example:
 Riptide → Ship
 ```
 
-The architecture should support future methods such as:
+Known transportation methods may include:
 
 ```text
 walking
@@ -21,16 +21,7 @@ mount
 special vehicle
 ```
 
-Transportation may have:
-
-```text
-cost
-availability
-departure location
-campaign requirements
-travel events
-risk
-```
+The player unlocks the corresponding transportation point or method, selects an available destination, and travels. Transportation has no generic cost, capacity, risk, or time system. Availability is determined by the declared world connection and its unlock state.
 
 Do not hardcode sea travel as a special one-off Riptide function.
 

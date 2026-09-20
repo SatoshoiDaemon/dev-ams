@@ -1,5 +1,7 @@
 # Levels and Build Progression
 
+> **Specification status:** The progression values in [Numeric Specification Baseline](../dev/numeric-specification-baseline.md) are canonical. The examples and philosophy below are descriptive unless they conflict with that baseline.
+
 ## Experience and Levels
 
 Character level progression uses a linear XP-growth model.
@@ -58,7 +60,7 @@ or:
 
 effectively meaningless
 
-Soft caps and diminishing returns may control secondary mechanics.
+Soft caps and diminishing returns are not global balance requirements. A specific mechanic may define one when its own behavior requires it.
 
 However:
 
@@ -87,7 +89,7 @@ Similar defensive or avoidance mechanics may require equivalent caps.
 
 The player must not become literally untouchable through a generic percentage stat unless a specific ability explicitly grants such a state.
 
-The system should use diminishing returns or configured maximums while preserving meaningful progression.
+The system must not add diminishing returns or configured maximums solely to contain balance. A specific mechanic may define a structural limit when required by its rules.
 
 ## Progression Sources
 
@@ -128,8 +130,8 @@ Examples include:
 - martial caster
 - ranged Fighting Style hybrid
 - status-focused melee build
-- high-Mana low-Spirit utility caster
-- high-Spirit low-Mana burst caster
+- high-Mana low-Intelligence utility caster
+- high-Intelligence low-Mana burst caster
 - critical spell build
 - blood/debuff build
 - weapon-focused mage

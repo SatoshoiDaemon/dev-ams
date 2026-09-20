@@ -1,6 +1,6 @@
 # Attributes, Power, and Defensive Resources
 
-> **Specification status:** The canonical section at the end resolves the former Spirit/Intelligence conflict and defines every attribute calculation, cap, allocation, and test value.
+> **Specification status:** The canonical section at the end is normative and defines every attribute calculation, cap, allocation, migration, and test value. Earlier text is historical where it conflicts.
 
 > **Historical source note:** The original draft called the magical offensive attribute Spirit. The canonical contract below resolves this as `Intelligence`; the old Spirit text is retained only as migration provenance.
 
@@ -13,7 +13,7 @@ Current core attributes are:
 - Strength
 - Dexterity
 - Precision
-- Spirit
+- Intelligence
 - Mana
 
 Localized attribute names, standardized into English:
@@ -23,12 +23,12 @@ Localized attribute names, standardized into English:
 - Strength
 - Dexterity
 - Precision
-- Spirit
+- Intelligence
 - Mana
 
-Spirit is the primary magical offensive attribute in this version of the design.
+Intelligence is the primary magical offensive attribute in this version of the design.
 
-If older documents/code refer to Intelligence as the magical offensive attribute, treat the current design as superseding that naming unless the maintainer explicitly decides otherwise.
+Older documents and save data may refer to this attribute as `Spirit`; the canonical ID is `intelligence` and the migration rule is defined below.
 
 ## Vigor
 
@@ -121,7 +121,7 @@ Base relationship:
 
 1 Mana = +10 MP
 
-Mana is separate from Spirit.
+Mana is separate from Intelligence.
 
 A character may therefore have:
 
@@ -175,6 +175,6 @@ Strength Power scales physical/unarmed and Strength-tagged attacks; Dexterity Po
 
 The global Scaling Grade multipliers are D `0.25`, C `0.50`, B `0.75`, A `1.00`, S `1.50`, SS `2.00`, SSS `2.50`. For each scaling entry: `floor(Attribute Power × grade multiplier)` is calculated first, then entries are summed. A single attribute may receive enhancement from at most 4 distinct sources; a fifth source is ignored and logged with source IDs.
 
-Secondary curves are bounded: Evasion is `clamp(base_evasion + dexterity_evasion + modifiers, 0, 95%)`; generic Damage Reduction is capped at `90%`; Resistance debuff reduction is `final_counter = max(1, floor(base_counter × 1000 / (1000 + Resistance × 10)))`. Attributes have no hard maximum, but a save rejects values below zero and values above `1_000_000` with a validation error.
+Secondary curves use their owning mechanics. Evasion uses the canonical Evasion Rating contract in [Combat](combat.md#accuracy-and-evasion), and Resistance debuff reduction is `final_counter = max(1, floor(base_counter × 1000 / (1000 + Resistance × 10)))`. The engine does not impose a generic Damage Reduction balance cap. Attributes have no gameplay hard maximum, but a save rejects values below zero and values above `1_000_000` with a validation error for data safety.
 
 Worked examples: a character with Vigor 12, Resistance 5, Mana 8 has `220 HP`, `100 Tenacity`, and `110 Mana`; Strength 10 at B Scaling contributes `floor(70 × .75) = 52`; Intelligence 20 gives `140 Intelligence Power` and Spell Capacity `20 + 2 × 20 = 60` before Catalyst and Grimoire bonuses. Tests must cover all seven IDs, Spirit migration, source limit, floor rounding, zero/maximum validation, and tenacity/debuff reduction.

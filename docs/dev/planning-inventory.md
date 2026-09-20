@@ -7,18 +7,18 @@ This inventory lists the design material preserved for the next planning stage. 
 | System | Preserved scope | Document |
 | --- | --- | --- |
 | Character creation | Races, initial elements, and persistent element ownership | [Character Creation](../systems/character-creation.md) |
-| Attributes and resources | Attributes, Power, HP, Tenacity, Mana, and the Spirit/Intelligence conflict | [Attributes](../systems/attributes.md) |
+| Attributes and resources | Attributes, Power, HP, Tenacity, Mana, and Intelligence | [Attributes](../systems/attributes.md) |
 | Scaling | Grades, Attribute Power, single/multiple Scaling, and Art of War Scaling | [Scaling](../systems/scaling.md) |
 | Combat | Entry, rounds, actions, Priority, critical damage, equipment actions, Bonus Actions, fleeing, events, and explanations | [Combat](../systems/combat.md) |
 | Status effects | Potency, Counter, competition, processing, 25 base effects, data, Lua, and diagnostics | [Status Effects](../systems/effects.md) |
 | Magic Nodes and Glyphs | Spell grammar, general and elemental Glyphs, status editing, and catalysts | [Magic Nodes and Glyphs](../systems/glyphs.md) |
 | Equipment Sigils | Equipment triggers plus general, weapon, and armor Sigils | [Equipment Sigils](../systems/sigils.md) |
 | Equipment | Armor slots, trinkets, combat-ready equipment, and legendary weapons | [Equipment](../systems/equipment.md) |
-| Inventory | Capacity philosophy and potentially limited categories | [Inventory](../systems/inventory.md) |
+| Inventory | Unlimited item storage; chests are for organization | [Inventory](../systems/inventory.md) |
 | Crafting | Forging, learned recipes, materials, and Blacksmith Templates | [Crafting](../systems/crafting.md) |
 | Economy | Currency sources, purchases, rewards, prices, and merchant behavior | [Economy](../systems/economy.md) |
 | Mining | Pickaxes, deposits, resource tiers, and the no-durability rule | [Mining](../systems/mining.md) |
-| Alchemy | Ingredients, success rules, generated potions, and Duration/Counter uncertainty | [Alchemy](../systems/alchemy.md) |
+| Alchemy | Ingredients, success rules, generated potions, and Counter-based duration | [Alchemy](../systems/alchemy.md) |
 | Fishing | Equipment, activities, locations, and rewards | [Fishing](../systems/fishing.md) |
 | Companions and mounts | Independent actors, progression, and travel roles | [Companions](../systems/companions.md) |
 | Fast travel | Churches, Goddess statues, and availability | [Fast Travel](../systems/fast-travel.md) |
@@ -56,14 +56,10 @@ The [world index](../world/README.md) is the shorter navigation page. The [NPC a
 ## Development Material
 
 - [Numeric Design Framework](numeric-design.md): deterministic units, rounding, modifier operations, status contracts, and approval states.
+- [Technical Contracts](technical-contracts.md): authority, stable IDs, content validation, mods, saves, Lua, events, and `explain last`.
 - [Numeric Coverage Audit](numeric-audit.md): numeric completeness, missing formulas, and planning priority for every system family.
-- [Status Numeric Planning](status-balance.md): per-effect numeric gaps, lifecycle requirements, resistance curve candidate, and test matrix.
-- [Glyph Numeric Planning](glyph-balance.md): candidate Weight and Status Budget equations plus the numeric-card requirements for all Glyphs.
 - [System Design Principles](system-design.md): configuration, modding, persistence, diagnostics, separation, testing, and priorities.
 - [Repository Workflow](repository-workflow.md): repository roles, documentation checks, and future Windows/Linux/musl builds.
-- [Systems Migration](systems-migration.md): complete mapping for the former `SYSTEMS.md`.
-- [World Migration](world-migration.md): complete mapping for the former `WORLDS.MD`.
-- [Glyph Migration](glyph-migration.md): translated mapping for the former `docs/GLYPH.md`.
 - [AGENTS.md](../../AGENTS.md): authoritative architectural requirements.
 
 The root README, contribution guide, MIT license, text conventions, documentation checker, and GitHub Actions workflow are also present.
@@ -78,10 +74,12 @@ All three directories are independent Git repositories on `main`. `dev-ams` has 
 
 ## Open Decisions
 
-- Choose Intelligence or Spirit as the magical offensive attribute and align its related responsibilities.
-- Resolve the contradictory Curse efficiency wording.
-- Define how potion Duration maps to Status Effect Counter.
-- Specify the combat opening condition, Bonus Action nesting, and fleeing rules.
-- Complete unspecified effect decay, damage-type, and replacement interactions.
-- Approve or replace the candidate Glyph Weight and status-budget equations and settle the remaining Node grammar mismatches.
-- Decide module, data-schema, save-version, mod-manifest, and Lua API boundaries before implementation scaffolding.
+- Specify the remaining fleeing rules and encounter-specific escape conditions.
+- Complete implementation-level validation for action-specific requirements not covered by the canonical Targeting contract.
+- Decide the remaining module boundaries and implement the technical contracts in [Technical Contracts](technical-contracts.md).
+
+## Deferred Specifications
+
+The following are intentionally deferred content specifications, not current architectural gaps: Fishing timing and tables; Mining yields and resource respawn; Trial, Arena, Shrine, Cataclysm, Abyss, and Honor of the King tuning; regional encounter weights; environmental hazard schedules; resource distribution; and enemy/content progression. They become implementation requirements when their respective content is being built, unless another active system depends on them earlier.
+
+The former Spirit/Intelligence, Curse, potion Duration/Counter, combat opening, Bonus Action, status lifecycle, and Glyph budget decisions are canonicalized in the relevant system documents and [Numeric Specification Baseline](numeric-specification-baseline.md). They are no longer open design questions, although their implementation and balance tests remain outstanding.
