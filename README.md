@@ -2,7 +2,7 @@
 
 A Magic Sovereign is an open-source, offline-first RPG designed to run directly in a terminal. Rust provides the engine, data defines the content, and embedded Lua provides extensible behavior. Players own their saves, configuration, and mods.
 
-This repository currently contains the initial design documentation and repository tooling. There is no Rust application, playable build, or release artifact yet. Design proposals and unresolved rules are identified in the documentation.
+The repository now contains the initial Rust foundation: portable relative directories, configuration loading, player-readable logging, stable IDs, deterministic JSON registries, a deterministic RNG, an event bus, embedded Lua setup, and a terminal-independent game state. Exploration and the complete combat loop remain future layers.
 
 ## Documentation
 
@@ -41,6 +41,8 @@ python scripts/check_docs.py
 The same check runs in GitHub Actions on Windows and Linux for pushes, pull requests, and manual runs. It checks Markdown encoding, merge markers, fenced code blocks, and local inline links. It makes no network requests. Python is only a contributor tool and is not a planned game runtime dependency.
 
 See the [repository workflow](docs/dev/repository-workflow.md) for the current CI scope and future build requirements.
+
+See the [Rust foundation decisions](docs/dev/rust-foundation.md) for the dependency and initialization contract.
 
 ## License
 

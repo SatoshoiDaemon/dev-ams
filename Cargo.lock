@@ -1,0 +1,17 @@
+version = 4
+
+[[package]]
+name = "a-magic-sovereign"
+version = "0.1.0"
+dependencies = [
+ "crossterm",
+ "mlua",
+ "rand_chacha",
+ "rand_core",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+ "toml",
+ "zip",
+]

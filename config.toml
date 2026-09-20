@@ -1,0 +1,16 @@
+schema_version = 1
+seed = 305419896
+
+[paths]
+saves = "saves"
+mods = "mods"
+data = "data"
+gamemodes = "gamemodes"
+logs = "logs"
+
+[numeric]
+hp_per_vigor = 10
+tenacity_per_resistance = 10
+mp_per_mana = 10
+power_per_attribute = 7
+tenacity_damage_share = 0.5

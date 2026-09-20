@@ -1,0 +1,29 @@
+[package]
+name = "a-magic-sovereign"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT"
+description = "Offline-first terminal RPG engine for A Magic Sovereign"
+
+[lib]
+name = "ams"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ams"
+path = "src/main.rs"
+
+[dependencies]
+crossterm = "0.28"
+mlua = { version = "0.10", features = ["lua54", "vendored"] }
+rand_chacha = "0.9"
+rand_core = "0.9"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+toml = "0.8"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+tempfile = "3"
