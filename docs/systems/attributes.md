@@ -1,6 +1,8 @@
 # Attributes, Power, and Defensive Resources
 
-> **Unresolved naming decision:** The source design below calls the magical offensive attribute **Spirit** and says it supersedes Intelligence. Repository instructions define **Intelligence** and assign it magical damage, advanced Node access, and spell complexity/weight responsibilities. Both positions are preserved by this migration; it does not approve a rename or resolve the difference in responsibilities. Stable attribute IDs and save compatibility require an explicit decision before implementation.
+> **Specification status:** The canonical section at the end resolves the former Spirit/Intelligence conflict and defines every attribute calculation, cap, allocation, and test value.
+
+> **Historical source note:** The original draft called the magical offensive attribute Spirit. The canonical contract below resolves this as `Intelligence`; the old Spirit text is retained only as migration provenance.
 
 ## Core Attributes
 
@@ -91,9 +93,9 @@ Base relationship:
 
 1 Precision = 7 Precision Power
 
-## Spirit
+## Historical Spirit Draft
 
-Spirit is primarily responsible for magical offensive power.
+The original draft assigned magical offensive power to Spirit.
 
 It affects:
 
@@ -154,3 +156,25 @@ True Damage ignores Tenacity.
 Tenacity additionally reduces debuff duration/effectiveness according to the appropriate rules.
 
 Tenacity is not simply bonus HP.
+
+## Canonical Quantified Attribute Contract
+
+The stable attribute IDs are `vigor`, `resistance`, `strength`, `dexterity`, `precision`, `intelligence`, and `mana`. `spirit` is not a separate attribute; old save data using `spirit` migrates one-for-one into `intelligence`, with a migration warning in the log. Level 1 provides `100 Max HP`, `50 Max Tenacity`, `30 Max Mana`, and `0` points in each attribute. Each level grants `1` attribute point; every 5th level grants one additional point.
+
+Derived values are:
+
+```text
+Max HP       = 100 + 10 × Vigor
+Max Tenacity = 50 + 10 × Resistance
+Max Mana     = 30 + 10 × Mana
+Attribute Power = 7 × attribute points
+Priority     = 100 + 2 × Dexterity + equipment_priority + status_priority
+```
+
+Strength Power scales physical/unarmed and Strength-tagged attacks; Dexterity Power scales melee/body weapons and contributes Evasion; Precision Power scales ranged weapons and Precision-tagged spells; Intelligence Power scales Magical damage and Spell Capacity. Power is never added directly to damage unless a Scaling Grade consumes it.
+
+The global Scaling Grade multipliers are D `0.25`, C `0.50`, B `0.75`, A `1.00`, S `1.50`, SS `2.00`, SSS `2.50`. For each scaling entry: `floor(Attribute Power × grade multiplier)` is calculated first, then entries are summed. A single attribute may receive enhancement from at most 4 distinct sources; a fifth source is ignored and logged with source IDs.
+
+Secondary curves are bounded: Evasion is `clamp(base_evasion + dexterity_evasion + modifiers, 0, 95%)`; generic Damage Reduction is capped at `90%`; Resistance debuff reduction is `final_counter = max(1, floor(base_counter × 1000 / (1000 + Resistance × 10)))`. Attributes have no hard maximum, but a save rejects values below zero and values above `1_000_000` with a validation error.
+
+Worked examples: a character with Vigor 12, Resistance 5, Mana 8 has `220 HP`, `100 Tenacity`, and `110 Mana`; Strength 10 at B Scaling contributes `floor(70 × .75) = 52`; Intelligence 20 gives `140 Intelligence Power` and Spell Capacity `20 + 2 × 20 = 60` before Catalyst and Grimoire bonuses. Tests must cover all seven IDs, Spirit migration, source limit, floor rounding, zero/maximum validation, and tenacity/debuff reduction.

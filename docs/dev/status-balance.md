@@ -1,6 +1,8 @@
-# Status Numeric Planning
+# Status Numeric Planning (Superseded Planning Record)
 
-This document audits the 25 canonical base Status Effects and defines the next numeric work required for each one. It does not replace [Status Effects](../systems/effects.md). Existing formulas below are canonical; proposed structures are marked as candidates.
+> The canonical implementation contract is now in [Status Effects](../systems/effects.md). This page remains as an audit/provenance record; “candidate” language below is historical and is not an implementation instruction.
+
+This document audits the 25 canonical base Status Effects and records the gaps that existed before the canonical contract was completed. It does not replace [Status Effects](../systems/effects.md).
 
 ## Shared Status Lifecycle Candidate
 
@@ -129,9 +131,9 @@ source_loss_policy
 
 ## Completion Order
 
-1. Resolve Curse and the Spirit/Intelligence dependency used by magical effects.
-2. Assign lifecycle events and expiry conditions to all 25 effects.
-3. Approve damage types, modifier stages, caps, and resistance curve inputs.
-4. Approve replacement-state behavior for Poison and source-loss behavior for source-linked control.
-5. Define status-specific Potency and Counter rates for the Glyph Status Budget model.
-6. Add worked examples and regression vectors to each canonical effect section.
+1. Historical planning item: resolve Curse and Spirit/Intelligence; completed in the canonical contract.
+2. Historical planning item: assign lifecycle events and expiry conditions; completed in the canonical contract.
+3. Historical planning item: approve damage types, modifier stages, caps, and resistance curve inputs; completed in the canonical contract.
+4. Historical planning item: approve Poison replacement and source-loss behavior; completed in the canonical contract.
+5. Historical planning item: define status-specific Potency and Counter rates; completed by the Glyph/Status integration contract.
+6. Continue adding implementation regression vectors as code is introduced.

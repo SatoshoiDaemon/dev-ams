@@ -17,7 +17,7 @@ This audit identifies which systems already have usable numbers and which requir
 | Scaling | Grade multipliers D through SSS are defined. | Combination of spell, catalyst, weapon, and Art of War Scaling; exceptional-grade availability | P0 |
 | Combat damage | Pipeline, floor rounding, damage types, Shield order, and Tenacity split are defined. | Defensive formulas, modifier stacking, armor/penetration, damage bounds | P0 |
 | Status effects | Potency/Counter model, default caps, competition, and many effect formulas are defined. | Missing decay events, Bleed damage type, Curse conflict, Poison replacement history, resistance curve | P0 |
-| Glyphs | Behaviors and a few illustrative Weight/status examples exist. | Weight equation, conversion efficiency, limits, target/repeat caps, timing, cooldowns, status mutation rules | P0 |
+| Glyphs | Canonical quantified specification now exists for all catalogued Glyphs, including Weight, status budget, limits, timing, cooldowns, validation, and test vectors. | Balance tuning may change versioned defaults; no implementation-blocking numeric gap remains. | Completed/P0 |
 | Sigils | Triggers and behaviors are proposed. | Every magnitude, reserve, mark, switching, cooldown, ownership, and event-mapping rule | P1 |
 | Priority | Influencing factors and example calculations exist. | Base formula, contribution coefficients, tie-breaker, bounds, cast/action/equipment Weight mapping | P1 |
 | Bonus Actions | Insertion behavior is defined. | Trigger depth, per-action/per-round limits, ordering, cycle detection | P0 |
@@ -57,6 +57,8 @@ This audit identifies which systems already have usable numbers and which requir
 | World state | Persistent states and stable IDs are defined. | Thresholds, transition triggers, reset/reversal rules | P2 |
 
 ## Recommended Planning Order
+
+The original audit below is preserved as historical sequencing. The current implementation baseline is [Numeric Specification Baseline](numeric-specification-baseline.md), and the current Glyph contract is [Canonical Quantified Specification](../systems/glyphs.md#canonical-quantified-specification).
 
 1. Approve numeric representations, rounding boundaries, modifier operations, and logging records.
 2. Resolve Intelligence versus Spirit and complete the attribute/resource contract.

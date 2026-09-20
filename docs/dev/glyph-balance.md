@@ -1,6 +1,8 @@
-# Glyph Numeric Planning
+# Glyph Numeric Planning (Superseded Planning Record)
 
-This document is the first structural candidate for Glyph numbers. It converts the existing behavior catalog into deterministic, configurable contracts without declaring final balance. The canonical Glyph descriptions remain in [Magic Nodes and Glyphs](../systems/glyphs.md), and status behavior remains in [Status Effects](../systems/effects.md).
+> The canonical values are now in [Magic Nodes and Glyphs — Canonical Quantified Specification](../systems/glyphs.md#canonical-quantified-specification). This page is retained as design provenance for the migration and must not be used as an implementation source. Where it says “candidate”, the canonical Glyph section has since made the decision.
+
+This document records the first structural planning pass for Glyph numbers. It is historical; the canonical Glyph descriptions and final defaults remain in [Magic Nodes and Glyphs](../systems/glyphs.md), and status behavior remains in [Status Effects](../systems/effects.md).
 
 ## Separate Weight from Status Budget
 

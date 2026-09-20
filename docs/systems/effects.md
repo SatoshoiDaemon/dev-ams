@@ -1,6 +1,8 @@
 # Status Effects
 
-This is the complete initial Status Effect specification, including the shared status material formerly repeated in the Glyph notes. [Glyphs](glyphs.md) and other systems consume this model. Individual effect definitions, examples, the canonical table, and the summary are retained together for reference. Shared numeric representation and validation requirements are planned in [Numeric Design](../dev/numeric-design.md), with the remaining per-effect work tracked in [Status Numeric Planning](../dev/status-balance.md).
+> **Specification status:** The canonical integration and numeric contract below is normative. It explicitly defines how Glyphs, equipment, and Fighting Styles create, modify, combine, compete, decay, and remove Status Effects.
+
+This is the complete Status Effect specification, including the shared status material formerly repeated in the Glyph notes. [Glyphs](glyphs.md), equipment, and Fighting Styles consume this model. Individual effect definitions, examples, the canonical table, and the summary are retained together for reference.
 
 ## Status Effect System
 
@@ -1599,7 +1601,7 @@ Attack Down
 Curse
 → modifies other Debuff efficiency by Counter
 → -1 Counter per turn
-→ exact second efficiency interaction requires clarification
+→ historical draft contained a conflicting second modifier; canonical rule is -20% Potency and -20% Counter once, with no Curse recursion
 ```
 
 ---
@@ -1779,6 +1781,59 @@ The generic engine must support these differences.
 
 Do not normalize every Status Effect into the same `Potency + Duration - 1 per turn` model.
 
-## Unresolved Effect Details
+## Historical Unresolved Effect Details
 
-Curse's conflicting second modifier is explicitly unresolved above. The source does not assign an explicit decay event or decay amount to every effect (including Stun, Binding, Silent, Charm, and Shield), and does not specify a damage type for Bleed. Do not infer a universal decay rule or damage type from the category or from another effect. Poison's handling of accumulated poisoned turns when a competing instance replaces it is also not specified.
+The original source left Curse's second modifier, several decay events, Bleed's damage type, and Poison replacement behavior unresolved. Those gaps are resolved by the canonical status lifecycle and Glyph/Status integration sections above; this paragraph is retained as provenance.
+## Canonical Glyph/Status Integration Contract
+
+This section is the required bridge between Glyphs and Status Effects. A Glyph never creates an anonymous temporary modifier when the behavior has Potency, Counter, a source, a removal event, or a decay event. It must either modify the status being applied or apply a registered Status Effect ID.
+
+### Status application from Glyphs
+
+Every `Apply Status` node produces a `StatusPacket`:
+
+```text
+effect_id, source_id, base_potency, base_counter, tags, glyph_operations
+```
+
+Glyph operations are applied in tree order, then repeated operations are combined, then limits and Resistance are applied, then competition is resolved. For every repeated operation targeting the same `effect_id` in one spell, the values are additive:
+
+```text
+combined_potency = min(effect.potency_limit, floor(base_potency × (1 + sum(potency_bonuses))))
+combined_counter = min(effect.counter_limit, floor(base_counter × (1 + sum(counter_bonuses))))
+```
+
+Each `+25%` same-effect Glyph therefore adds `25%` to both Potency and Counter before the cap. A Glyph may override one side explicitly (for example `Lingering` exchanges Potency for Counter), but it must record the consumed and produced values in the packet. No operation may create more Status Budget than its card permits.
+
+Applications of the same `effect_id` from one spell merge before competition. Applications from different sources do not merge: they use the normal Potency-then-Counter competition rule. If an incoming instance wins, its `source_id`, Glyph IDs, consumed values, and transformation history replace the losing instance's history. If it loses, no partial Potency or Counter is retained.
+
+### Shared limits and event order
+
+Normal statuses have Potency and Counter `0..100`; crowd control has Potency `1` and Counter `1..5`; instant statuses have Counter `0`. Resistance transforms incoming Counter with `max(1, floor(Counter × 1000 / (1000 + Resistance × 10)))` before competition. End-of-turn processing order is: execute declared ticks, emit damage/resource events, decay Potency/Counter, remove expired statuses, then emit `Status Removed`. An effect with Counter `0` expires immediately after its current event unless it is instant.
+
+The canonical status tick order is stable effect ID order, then source ID. Status-created status applications are queued after the current event and cannot recursively execute more than `16` trigger levels or `256` combat events in one action.
+
+### Glyph-native Status Effects
+
+These are registered Status Effect IDs because they have persistence, Counter, removal, or interaction rules. They are not hidden one-off modifiers.
+
+| ID | Category | Potency/Counter | Exact behavior | Applied by |
+|---|---|---|---|---|
+| `base:reveal-lock` | Debuff | `1 / 3` | Target cannot gain Invisible; Counter loses 1 at end of target turn. | Light Revelation |
+| `base:shadow-debt` | Debuff | `debt_hp / debt_mana`, max `20/10` | At Counter `3`, pays resources; unpaid portion deals True Damage. Counter loses 1 per turn. | Darkness Shadow Debt |
+| `base:erosion` | Debuff | `tenacity_bonus / 3`, max `50/3` | Each consecutive Earth hit adds 10 Tenacity Damage percentage points to Potency; target switch removes it. | Earth Erosion |
+| `base:resonance` | Buff | `sequence_count / 3`, max `3/3` | Same-spell consecutive hits gain 10% effect per Potency; another spell removes it. | Sound Resonance |
+| `base:cryostasis` | Neutral | `1 / 2` | Target status values cannot decay or be transformed while active. | Ice Cryostasis |
+| `base:molten-ground` | Debuff/Area | `effect_power / 3`, max `50/3` | Entering or ending a turn in the area receives 50% stored effect once per turn. | Lava Molten Ground |
+| `base:electrified-network` | Debuff | `members / 3`, max `6/3` | Connected Electrified targets count as one network for Lightning effects. | Lightning Conductor |
+| `base:plant-growth` | Buff | `turns / 5`, max `5/5` | Persistent Plant output gains 10% per active turn. | Plant Growth |
+
+The existing effects `Burn`, `Poison`, `Bleed`, `Electrified`, `Tremor`, `Fragile`, `Rupture`, and all other canonical IDs remain the preferred target for elemental Glyphs. For example, Fire Ignition consumes `base:burn` Counter; it does not create `base:ignition`. Poison Glyphs modify `base:poison`; Ice Permafrost changes the decay flag on the applied status; Water Equalize redistributes Potency among the selected existing status IDs.
+
+### Glyph stacking examples
+
+An application of Poison `20 Potency / 4 Counter` with two same-effect amplification Glyphs of `+25%` each becomes `30 / 6` before Resistance. A third identical Glyph would produce `35 / 7`, not a second Poison effect. If the target already has Poison `28 / 8`, the incoming `35 / 7` wins by Potency and replaces it; if it were `28 / 9`, it wins by Counter when Potency ties. Condensed remains an explicit exchange and is applied after same-effect additive bonuses, with the final result clamped to Poison's `100/100` limits.
+
+### Required tests
+
+Implementations must test: two and three same-effect Glyphs increasing both Potency and Counter; mixed amplification plus Condensed; Resistance before competition; source separation; replacement history; Glyph application of every Glyph-native Status ID; status removal disabling its linked Glyph behavior; and `explain last` showing the complete packet and operation sequence.
