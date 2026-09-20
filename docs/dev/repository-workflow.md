@@ -20,11 +20,11 @@ GitHub Actions runs this check on Windows and Linux for pushes, pull requests, a
 
 Python and the CI environment are contributor tools. They are not dependencies of the installed game. The local documentation check works without Internet access.
 
-## Future Rust build checks
+## Rust build checks
 
-There is currently no `Cargo.toml`, Rust source, or executable. Rust compilation and release publishing are therefore not part of the initial workflow.
+`.github/workflows/engine.yml` uses the declared Rust 1.80 MSRV to run formatting, Clippy with warnings denied, all targets/tests, and release builds on Windows and Linux. A separate Linux job installs `musl-tools`, builds `x86_64-unknown-linux-musl`, and rejects an executable containing a dynamic program interpreter. `Cargo.lock` is tracked for reproducible application builds.
 
-When the engine is added, extend CI to run formatting, Clippy, and appropriate tests, and produce Windows and Linux release builds. The Linux distribution target must include `x86_64-unknown-linux-musl` with static linkage. Verify embedded Lua, relative filesystem paths, complete local assets, and launch from a copied installation with no network connection. Preserve `Cargo.lock` for the application.
+Release publishing is still separate from CI validation. Packaging must additionally verify relative filesystem paths, complete local assets, and launch from a copied installation with no network connection.
 
 Build checks and release packaging must demonstrate these properties before a playable release is advertised. The public repository must distribute the license and the complete portable installation, including `config.toml`, `saves`, `gamemodes`, `mods`, `data`, and `logs` as appropriate.
 

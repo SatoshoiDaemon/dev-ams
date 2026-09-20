@@ -1,0 +1,92 @@
+[
+  {"id":"base:condensed","name":"Condensed","weight":4,"requirements":["apply_status"],"rule":"Exchange Counter for Potency without increasing status budget."},
+  {"id":"base:lingering","name":"Lingering","weight":4,"requirements":["apply_status"],"rule":"Exchange Potency for Counter."},
+  {"id":"base:stable","name":"Stable","weight":5,"requirements":["decaying_status"],"rule":"Prevent the first two natural Potency-decay events."},
+  {"id":"base:accelerated","name":"Accelerated","weight":4,"requirements":["tick_status"],"rule":"Execute one status tick immediately and consume 2 Counter."},
+  {"id":"base:delayed","name":"Delayed","weight":3,"requirements":["apply_status"],"rule":"Release after two turns with 25% more Potency."},
+  {"id":"base:contagious","name":"Contagious","weight":6,"requirements":["non_crowd_control_status"],"rule":"On death transfer half remaining Potency and Counter once."},
+  {"id":"base:embedded","name":"Embedded","weight":6,"requirements":["debuff"],"rule":"On cleanse deal 25% remaining budget as True Damage, capped at 20."},
+  {"id":"base:threshold","name":"Threshold","weight":2,"requirements":["apply_status"],"rule":"Apply only under the selected HP or debuff-count condition."},
+
+  {"id":"base:ignition","name":"Ignition","weight":5,"element":"fire","requirements":["burn"],"rule":"Consume 1..5 Burn Counter for proportional Magical Fire Damage."},
+  {"id":"base:kindling","name":"Kindling","weight":4,"element":"fire","requirements":["burn"],"rule":"Store half Burn Potency lost, capped at 20, for the next Burn."},
+  {"id":"base:flashover","name":"Flashover","weight":6,"element":"fire","requirements":["burn","multiple_targets"],"rule":"Copy 30% Burn Potency to at most three secondary targets."},
+  {"id":"base:cremation","name":"Cremation","weight":7,"element":"fire","requirements":["burn"],"rule":"On death explode for half remaining Burn budget, capped at 40."},
+  {"id":"base:white-flame","name":"White Flame","weight":4,"element":"fire","requirements":["damage"],"rule":"Fire Damage -20%; Shield Damage +50%."},
+
+  {"id":"base:flow","name":"Flow","weight":3,"element":"water","requirements":["chain"],"rule":"The final Chain may return once at 50% effect."},
+  {"id":"base:dilution","name":"Dilution","weight":4,"element":"water","requirements":["apply_status","debuff"],"rule":"Spend 20% new status Potency to remove 20% of another debuff Potency."},
+  {"id":"base:confluence","name":"Confluence","weight":4,"element":"water","requirements":["heal"],"rule":"Convert half overheal to Shield, capped at 25% caster Max HP."},
+  {"id":"base:undertow","name":"Undertow","weight":3,"element":"water","requirements":["pull"],"rule":"Water Pull applies Priority -10 to the next action."},
+  {"id":"base:equalize","name":"Equalize","weight":6,"element":"water","requirements":["area","apply_status"],"rule":"Average selected status Potencies for at most four targets."},
+
+  {"id":"base:foundation","name":"Foundation","weight":4,"element":"earth","requirements":["damage_or_shield"],"rule":"If unmoved since last action, output and Shield +20%."},
+  {"id":"base:seismic","name":"Seismic","weight":4,"element":"earth","requirements":["push"],"rule":"Each prevented Push tile deals 5 Tenacity Damage, capped at 25."},
+  {"id":"base:faultline","name":"Faultline","weight":6,"element":"earth","requirements":["area","tremor"],"rule":"Copy 30% Tremor Potency and Counter to at most two targets."},
+  {"id":"base:bedrock","name":"Bedrock","weight":5,"element":"earth","requirements":["shield"],"rule":"Shield HP -25%; Resistance Scaling +50%."},
+  {"id":"base:erosion","name":"Erosion","weight":5,"element":"earth","requirements":["damage"],"rule":"Consecutive Earth hits gain 10% Tenacity Damage, capped at 50%."},
+
+  {"id":"base:tailwind","name":"Tailwind","weight":3,"element":"air","requirements":["push"],"rule":"Each 10 Priority advantage grants 5% Push and speed, capped at 25%."},
+  {"id":"base:slipstream","name":"Slipstream","weight":3,"element":"air","requirements":["movement_effect"],"rule":"Successful forced movement grants +15 Priority next action."},
+  {"id":"base:ricochet","name":"Ricochet","weight":6,"element":"air","requirements":["projectile"],"rule":"A miss retargets once at 60% effect."},
+  {"id":"base:vacuum","name":"Vacuum","weight":4,"element":"air","requirements":["pull"],"rule":"Pull at most two projectiles or traps by two tiles."},
+  {"id":"base:updraft","name":"Updraft","weight":5,"element":"air","requirements":["push","damage"],"rule":"Damage -50%; Push distance doubled."},
+
+  {"id":"base:purification","name":"Purification","weight":4,"element":"light","requirements":["heal","cleanse"],"rule":"Spend 25% Heal to remove 25% of at most two debuff budgets."},
+  {"id":"base:revelation","name":"Revelation","weight":4,"element":"light","requirements":["reveal"],"rule":"Remove Invisible and apply Reveal Lock for 3 Counter."},
+  {"id":"base:judgment","name":"Judgment","weight":5,"element":"light","requirements":["damage"],"rule":"Consume up to 20 enemy Buff Potency for up to +10% damage."},
+  {"id":"base:sanctuary","name":"Sanctuary","weight":6,"element":"light","requirements":["aura","area"],"rule":"Share a positive Aura at 50% with at most three allies."},
+  {"id":"base:absolution","name":"Absolution","weight":4,"element":"light","requirements":["cleanse"],"rule":"A full cleanse restores capped HP and Mana percentages."},
+
+  {"id":"base:devour","name":"Devour","weight":5,"element":"darkness","requirements":["drain","debuff"],"rule":"Consume up to 10 debuff Counter for up to +20% Drain."},
+  {"id":"base:corruption","name":"Corruption","weight":5,"element":"darkness","requirements":["remove_buff"],"rule":"Convert half removed Buff Potency into Curse, capped at 20."},
+  {"id":"base:shadow-debt","name":"Shadow Debt","weight":4,"element":"darkness","requirements":["spell"],"rule":"Weight and Mana -3 now; pay HP and Mana after three turns."},
+  {"id":"base:usurpation","name":"Usurpation","weight":7,"element":"darkness","requirements":["damage"],"rule":"On kill copy one Buff at 50% for three turns."},
+  {"id":"base:eclipse","name":"Eclipse","weight":4,"element":"darkness","requirements":["target_enemy"],"rule":"Gain output according to the target's nearby ally count."},
+
+  {"id":"base:toxic-catalyst","name":"Toxic Catalyst","weight":5,"element":"poison","requirements":["poison"],"rule":"Each distinct debuff adds 5% Poison tick Potency, capped at 50%."},
+  {"id":"base:necrosis","name":"Necrosis","weight":6,"element":"poison","requirements":["poison"],"rule":"Convert 20% Poison tick to direct HP Damage; Potency -30%."},
+  {"id":"base:anticoagulant","name":"Anticoagulant","weight":4,"element":"poison","requirements":["poison","bleed"],"rule":"Bleed advances Poison one tick and consumes one Poison Counter."},
+  {"id":"base:reservoir","name":"Reservoir","weight":5,"element":"poison","requirements":["poison"],"rule":"Preserve half old Counter on higher-Potency replacement, capped at 20."},
+  {"id":"base:compound","name":"Compound","weight":4,"element":"poison","requirements":["poison","debuff"],"rule":"One debuff loses 25% less Counter while Poison remains."},
+
+  {"id":"base:permafrost","name":"Permafrost","weight":4,"element":"ice","requirements":["apply_status"],"rule":"Skip the first natural decay event."},
+  {"id":"base:brittle","name":"Brittle","weight":5,"element":"ice","requirements":["crowd_control"],"rule":"Consume Counter for 10 Tenacity Damage, at most three times."},
+  {"id":"base:cold-snap","name":"Cold Snap","weight":5,"element":"ice","requirements":["apply_status"],"rule":"Consume up to three Counter for five Ice Damage each."},
+  {"id":"base:cryostasis","name":"Cryostasis","weight":6,"element":"ice","requirements":["apply_status"],"rule":"Freeze one status for exactly two turns."},
+  {"id":"base:shatter","name":"Shatter","weight":7,"element":"ice","requirements":["damage"],"rule":"Breaking Shield or Tenacity adds 25% broken value, capped at 30."},
+
+  {"id":"base:echo","name":"Echo","weight":8,"element":"sound","requirements":["effect"],"rule":"Repeat the last Effect after two actions at 50%."},
+  {"id":"base:resonance-glyph","name":"Resonance","weight":5,"element":"sound","requirements":["damage"],"rule":"Consecutive same-spell hits gain 10% effect, capped at 30%."},
+  {"id":"base:dissonance","name":"Dissonance","weight":4,"element":"sound","requirements":["interrupt"],"rule":"Double interruption power and deal 10 Sound Damage on success."},
+  {"id":"base:harmonic","name":"Harmonic","weight":4,"element":"sound","requirements":["area"],"rule":"Gain 5% effect per target, capped at 25%."},
+  {"id":"base:feedback","name":"Feedback","weight":6,"element":"sound","requirements":["interruptible"],"rule":"When interrupted, return half spent Mana and primary effect."},
+
+  {"id":"base:magnetism","name":"Magnetism","weight":3,"element":"metal","requirements":["movement_effect"],"rule":"Gain 10% force per 100 target equipment Weight, capped at 50%."},
+  {"id":"base:sharpen","name":"Sharpen","weight":4,"element":"metal","requirements":["physical_damage"],"rule":"Physical Damage -15%; Armor Penetration +25 points."},
+  {"id":"base:temper","name":"Temper","weight":4,"element":"metal","requirements":["shield_or_protect"],"rule":"Multiply Counter from armor Weight, capped at x2."},
+  {"id":"base:shrapnel","name":"Shrapnel","weight":6,"element":"metal","requirements":["pierce"],"rule":"Create at most three secondary projectiles at 40%."},
+  {"id":"base:forge-bond","name":"Forge Bond","weight":5,"element":"metal","requirements":["weapon_form","equipped_weapon"],"rule":"Blend 30% weapon Scaling with 70% magical Scaling."},
+
+  {"id":"base:growth","name":"Growth","weight":5,"element":"plant","requirements":["persistent_effect"],"rule":"Gain 10% output per active turn, capped at 50%."},
+  {"id":"base:root","name":"Root","weight":4,"element":"plant","requirements":["binding","movement_effect"],"rule":"Prevented movement adds Binding Counter, capped at five."},
+  {"id":"base:germination","name":"Germination","weight":6,"element":"plant","requirements":["trap"],"rule":"An untriggered Trap leaves one generation of child Traps."},
+  {"id":"base:photosynthesis","name":"Photosynthesis","weight":4,"element":"plant","requirements":["heal_or_shield"],"rule":"A surviving effect restores 5% Max Mana, capped at 10."},
+  {"id":"base:propagation","name":"Propagation","weight":6,"element":"plant","requirements":["apply_status"],"rule":"On death transfer 30% status or create a Trap."},
+
+  {"id":"base:molten-ground-glyph","name":"Molten Ground","weight":6,"element":"lava","requirements":["area"],"rule":"Leave a two-tile area for three turns at 50% effect."},
+  {"id":"base:obsidian","name":"Obsidian","weight":5,"element":"lava","requirements":["persistent_effect"],"rule":"On expiry leave a Trap at 40% effect and two Counter."},
+  {"id":"base:melt-armor","name":"Melt Armor","weight":5,"element":"lava","requirements":["damage"],"rule":"Consecutive hits reduce physical Defense up to 20%."},
+  {"id":"base:viscosity","name":"Viscosity","weight":4,"element":"lava","requirements":["push"],"rule":"Push -50%; Priority -10 and Movement -1 for two turns."},
+  {"id":"base:eruption","name":"Eruption","weight":7,"element":"lava","requirements":["terrain_or_trap"],"rule":"Consume object Counter for 5 damage each, capped at 50."},
+
+  {"id":"base:conductor","name":"Conductor","weight":5,"element":"lightning","requirements":["chain","electrified"],"rule":"Form a six-member Electrified network for three turns."},
+  {"id":"base:overload","name":"Overload","weight":5,"element":"lightning","requirements":["electrified"],"rule":"Consume up to three Counter for eight Lightning Damage each."},
+  {"id":"base:arc-jump","name":"Arc Jump","weight":4,"element":"lightning","requirements":["chain"],"rule":"Prioritize non-Electrified targets; otherwise next jump -25%."},
+  {"id":"base:grounding","name":"Grounding","weight":4,"element":"lightning","requirements":["electrified"],"rule":"Against exactly one enemy, Counter +2 and Damage -20%."},
+  {"id":"base:impulse","name":"Impulse","weight":4,"element":"lightning","requirements":["chain","electrified"],"rule":"Acting first grants 20% Chain and Electrified effect."},
+
+  {"id":"base:staff-focus","name":"Staff Focus","weight":5,"requirements":["effect_node"],"rule":"One Effect Node's Modifiers gain 25% efficiency, capped at 50%."},
+  {"id":"base:grimoire-inscription","name":"Grimoire Inscription","weight":4,"requirements":["grimoire"],"rule":"Store at most three phrases and halve repeated repertoire cost."},
+  {"id":"base:seal-imposition","name":"Seal Imposition","weight":5,"requirements":["apply_status"],"rule":"Improve one status budget exchange rate by 25%."}
+]

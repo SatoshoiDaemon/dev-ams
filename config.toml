@@ -9,8 +9,11 @@ gamemodes = "gamemodes"
 logs = "logs"
 
 [numeric]
+base_hp = 100
+base_tenacity = 50
+base_mana = 30
 hp_per_vigor = 10
 tenacity_per_resistance = 10
 mp_per_mana = 10
 power_per_attribute = 7
-tenacity_damage_share = 0.5
+tenacity_hp_share_bps = 5000

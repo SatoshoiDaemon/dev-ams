@@ -1,0 +1,64 @@
+name: Engine
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: engine-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: '1'
+
+jobs:
+  test:
+    name: Rust 1.80 (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Rust 1.80
+        run: rustup toolchain install 1.80.0 --profile minimal --component rustfmt,clippy
+      - name: Check formatting
+        run: cargo +1.80.0 fmt --all -- --check
+      - name: Check warnings
+        run: cargo +1.80.0 clippy --all-targets --locked -- -D warnings
+      - name: Run tests
+        run: cargo +1.80.0 test --all-targets --locked
+      - name: Build release executable
+        run: cargo +1.80.0 build --release --locked
+
+  linux-musl:
+    name: Static Linux x86_64 musl
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install musl compiler
+        run: sudo apt-get update && sudo apt-get install --yes musl-tools
+      - name: Install Rust target
+        run: |
+          rustup toolchain install 1.80.0 --profile minimal
+          rustup target add --toolchain 1.80.0 x86_64-unknown-linux-musl
+      - name: Build static release executable
+        run: cargo +1.80.0 build --release --locked --target x86_64-unknown-linux-musl
+      - name: Verify executable is static
+        run: |
+          file target/x86_64-unknown-linux-musl/release/ams
+          ! readelf --program-headers target/x86_64-unknown-linux-musl/release/ams | grep --quiet 'Requesting program interpreter'

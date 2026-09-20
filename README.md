@@ -2,7 +2,7 @@
 
 A Magic Sovereign is an open-source, offline-first RPG designed to run directly in a terminal. Rust provides the engine, data defines the content, and embedded Lua provides extensible behavior. Players own their saves, configuration, and mods.
 
-The repository now contains the initial Rust foundation: portable relative directories, configuration loading, player-readable logging, stable IDs, deterministic JSON registries, a deterministic RNG, an event bus, embedded Lua setup, and a terminal-independent game state. Exploration and the complete combat loop remain future layers.
+The repository contains the initial executable engine layer: deterministic integer arithmetic, attributes and resources, Scaling, action declaration and Priority queues, the damage pipeline, status competition and lifecycle, the data-driven base Glyph catalog, bounded events, `explain last`, editable ZIP saves, deterministic mod discovery, and sandboxed embedded Lua. Exploration, content-rich encounters, and the terminal combat UI remain future layers.
 
 ## Documentation
 
@@ -28,7 +28,20 @@ Each directory is an independent Git repository. This repository tracks `git@git
 - Runtime operation must work offline, without accounts, telemetry, DRM, a browser, or a local server.
 - Saves must be editable JSON inside ZIP archives. Configuration, mods, data, and logs must remain visible in the installation directory.
 
-These are implementation requirements, not claims about an existing build.
+GitHub Actions verifies native Windows/Linux builds and the static `x86_64-unknown-linux-musl` release target. The installed game still requires the data and configuration files beside the executable.
+
+## Rust checks
+
+The project MSRV is Rust 1.80. From the repository root:
+
+```sh
+cargo fmt --all -- --check
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --all-targets --locked
+cargo build --release --locked
+```
+
+The base Glyph cards are loaded from `data/glyphs.json`; they are content rather than a Rust match table.
 
 ## Repository checks
 

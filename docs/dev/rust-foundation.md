@@ -16,6 +16,18 @@
 
 Conteúdo JSON é descoberto recursivamente, ordenado pelo caminho e inserido em um `BTreeMap` por ID estável no formato `namespace:name`. Isso torna a ordem independente do sistema de arquivos.
 
-## Limites atuais
+## Sistemas iniciais implementados
 
-Esta etapa implementa a fundação não visual. A aplicação ainda não possui loop de exploração, combate completo, migrações de saves ou uma API Lua de conteúdo. Esses pontos devem ser adicionados sobre os módulos existentes, sem mover regras para a apresentação.
+A fundação não visual agora inclui:
+
+- aritmética `i64` determinística com razões inteiras e basis points;
+- atributos, recursos derivados, Power, limite de quatro fontes e Scaling;
+- ações, AP, Cast, Priority, TargetSpec e ordenação determinística;
+- Accuracy, Evasion, Parry, Defense, Block, Shield, Tenacity, HP e True Damage;
+- eventos limitados por profundidade/quantidade e pacote substituível de `explain last`;
+- registro e ciclo de vida data-driven de Status Effects;
+- editor de spells e catálogo de Glyphs em `data/glyphs.json`;
+- saves ZIP versionados com JSON e preservação de dados opacos de mods;
+- descoberta determinística de mods e Lua 5.4 embutido sem IO, OS ou carregamento de módulos nativos.
+
+O loop visual de exploração, a interface terminal completa de combate e o conteúdo de encontros continuam como camadas futuras. A API Lua v1 expõe neste momento o runtime seguro e a negociação de versão; handles de mutação/eventos serão conectados conforme os sistemas de host forem compostos no loop da aplicação.
