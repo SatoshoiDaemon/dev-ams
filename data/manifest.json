@@ -1,0 +1,7 @@
+{
+  "id": "base:game",
+  "name": "A Magic Sovereign Base Content",
+  "version": "0.1.0",
+  "api_version": 1,
+  "dependencies": []
+}

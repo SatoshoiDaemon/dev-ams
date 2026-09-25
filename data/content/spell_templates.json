@@ -1,0 +1,17 @@
+[
+  {
+    "id": "base:dark-flame-armament",
+    "name": "Dark Flame Armament",
+    "race_id": "base:demon",
+    "nodes": ["source:weapon-or-unarmed", "type:imbuement", "effect:damage", "status:base:dark-flame"],
+    "glyph_ids": []
+  },
+  {
+    "id": "base:black-flame-orb",
+    "name": "Black Flame Orb",
+    "race_id": "base:demon",
+    "nodes": ["source:self", "type:projectile", "effect:true-damage", "status:base:dark-flame"],
+    "glyph_ids": [],
+    "demonstration_action_id": "base:black-flame-orb-demo"
+  }
+]

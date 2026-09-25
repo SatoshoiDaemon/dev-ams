@@ -111,7 +111,7 @@ Every save records at least:
 
 ```json
 {
-  "save_format_version": 1,
+  "save_format_version": 2,
   "ruleset_version": "..."
 }
 ```
@@ -247,7 +247,7 @@ Target requirements are declarative and action-specific, such as `target_has_sta
 
 ## Explain Last
 
-`explain last` exposes the latest completed action packet, whether the action resolved or was rejected. It replaces the previous packet; it is not an unbounded combat history and is not required to be persisted in the save. For delayed effects such as Aftershock, `after 1 action` counts the next action resolved by any combatant.
+`explain last` exposes the latest completed action packet, whether the action resolved or was rejected. It replaces the previous packet; it is not an unbounded combat history. Save format v2 persists it inside an active `combat.json` so a resumed combat retains the same trace. For delayed effects such as Aftershock, `after 1 action` counts the next action resolved by any combatant.
 
 The packet includes, when applicable:
 
@@ -290,12 +290,13 @@ The following decisions are canonical and no longer open design questions:
 These are implementation contracts, not requests for additional endgame or content
 design.
 
-## Remaining open technical contracts
+## Extension contracts after the vertical slice
 
-The following items remain to be closed before the corresponding implementation
-area is considered stable.
+The vertical slice closes the engine contracts described above. The following are
+extension points for systems that are not executable yet; they are not missing rules
+for the current combat path.
 
-### Action-specific validation
+### Action-specific validation for future systems
 
 `TargetSpec` defines who may be selected, but each action still needs a declarative
 validation contract for requirements that are not targeting itself. Before payment,
@@ -309,17 +310,18 @@ an action definition must be able to state, where applicable:
 - required element ownership, node, learned stable ID, or spell preparation;
 - target filters such as status, boss, HP threshold, or relation.
 
-The contract must also specify validation timing: declaration validation happens
+The implemented contract specifies that declaration validation happens
 before AP/resource payment, and resolution validation happens again after earlier
 actions may have changed the state. Invalid actions need a typed rejection reason
-and must not partially pay AP, resources, or item costs. The remaining work is to
-define the initial `ActionRequirement` vocabulary and rejection codes; the engine
-should make the vocabulary extensible rather than encode every action in a match.
+and must not partially pay AP or resources. The current typed vocabulary covers
+active state, tags, statuses, Mana, target HP, and target relations. Equipment,
+element ownership, catalysts, and Fighting Styles extend the centralized vocabulary
+when those systems become executable.
 
 ### Module boundaries and concrete interfaces
 
-The dependency direction is closed. The remaining implementation work is to express
-it in Rust module interfaces. The minimum boundary is:
+The dependency direction is expressed by the current Rust modules. The maintained
+boundary is:
 
 ```text
 terminal ─> app ─> systems ─> engine/state
@@ -340,45 +342,39 @@ The following ownership must be explicit:
 - `terminal`: input and rendering only; it must not decide game rules;
 - `app`: startup, mode transitions, command routing, and dependency composition.
 
-The concrete Rust crate/module layout and public function/trait signatures may be
-chosen as implementation begins. Systems must depend on engine contracts, not on
-terminal types. This does not require designing a perfect architecture before the
-first vertical slice.
+Systems depend on engine contracts rather than terminal types. Future modules must
+preserve this direction instead of moving gameplay rules into the CLI.
 
 ### Lua API payloads and expansion
 
-The minimum Lua API surface is closed as API version 1. The remaining work is to
-define payload schemas and add system-specific operations only when those systems
-become executable:
+The minimum Lua surface is implemented as API version 1: load-time action/status
+registration, stable namespaced event listeners, deterministic ordering, copied
+entity/attribute/resource/status queries, and queued damage, healing, resource, and
+status commands. Each mod has an isolated runtime; callback instruction, recursion,
+and event limits are enforced, and an ordinary callback failure disables only that
+listener for the session with contextual diagnostics.
 
-- mod metadata and `mod_api_version` negotiation;
-- registration of content definitions and stable IDs;
-- event subscription and deterministic callback ordering;
-- read-only entity, attribute, resource, status, equipment, and world queries;
-- controlled mutations such as applying/removing statuses, damage, healing,
-  resource changes, and registering actions;
-- callback failure behavior, instruction/time limits, recursion limits, and event
-  limits;
-- value conversion rules between Lua and engine integers/enums/IDs.
+Future executable systems may add equipment, inventory, world, spell-editor, and
+other system-specific queries or commands. Those additions require documented
+payload/value-conversion schemas and deliberate API compatibility decisions; they
+must not expand API v1 by exposing arbitrary engine references.
 
 The API continues to omit filesystem, process, shell, native-library, network, and
 arbitrary Rust access.
 
 ### Save archive layout
 
-Save ownership and opaque mod-data preservation are closed. The remaining concrete
-persistence decision is the first internal ZIP layout, for example which entries
-hold `character.json`, `world.json`, inventory, effects, metadata, and opaque mod
-namespaces. The layout must remain human-readable, editable, and versioned; it does
-not need to anticipate every future system.
+Save format v2 contains `metadata.json`, `ruleset.json`, `entities.json`, optional
+`combat.json`, and `mod_data.json`. Later systems may add versioned entries, but must
+preserve the human-readable, editable ownership contract and ordered migrations.
 
 ### Tests and balance validation
 
-These are not design blockers, but they are completion requirements. Canonical
-numeric values need executable regression vectors, while balance tuning may continue
-through ruleset versions after the engine exists. Tests must cover formulas,
-pipeline/event ordering, invalid external data, Lua failure isolation, save
-round-trips, and the `Fled` result. Deterministic systems must also satisfy:
+The vertical-slice suite covers formulas, damage and event ordering, target
+revalidation, atomic payment, Cast interruption, reactions, Bonus Action limits,
+status ticks, Demon boundaries, invalid mod dependencies, Lua listener isolation,
+configuration precedence, save migration/round-trips, Victory, and `Fled`.
+Deterministic systems satisfy:
 
 ```text
 same state
@@ -389,6 +385,6 @@ same state
 = same result and explain last trace
 ```
 
-Regression tests should assert important explanation fields, not only final totals;
-for example, scaling contributions, Shield damage, Tenacity damage, HP damage, event
-order, and rejection reasons.
+Future systems must add equivalent regression vectors and explanation assertions as
+they become executable. Balance tuning may continue through versioned data/rulesets
+without reopening the deterministic engine contract.

@@ -88,8 +88,11 @@ pub enum StatusModifier {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(default)]
 pub struct StatusDefinition {
     pub id: String,
+    #[serde(default)]
+    pub replacement_of: Option<String>,
     pub name: String,
     pub categories: BTreeSet<StatusCategory>,
     pub uses_potency: bool,
@@ -105,6 +108,34 @@ pub struct StatusDefinition {
     pub modifiers: Vec<StatusModifier>,
     #[serde(default)]
     pub tags: BTreeSet<String>,
+    #[serde(default)]
+    pub immune_target_tags: BTreeSet<String>,
+    #[serde(default)]
+    pub suppresses_categories: BTreeSet<StatusCategory>,
+}
+
+impl Default for StatusDefinition {
+    fn default() -> Self {
+        Self {
+            id: String::new(),
+            replacement_of: None,
+            name: String::new(),
+            categories: BTreeSet::new(),
+            uses_potency: true,
+            uses_counter: true,
+            potency_min: 0,
+            potency_max: Some(100),
+            counter_min: 1,
+            counter_max: Some(100),
+            fixed_potency: None,
+            tick: TickBehavior::None,
+            decay: DecayBehavior::None,
+            modifiers: Vec::new(),
+            tags: BTreeSet::new(),
+            immune_target_tags: BTreeSet::new(),
+            suppresses_categories: BTreeSet::new(),
+        }
+    }
 }
 
 impl StatusDefinition {
@@ -234,6 +265,10 @@ impl StatusCollection {
         self.active.remove(effect_id)
     }
 
+    pub fn set_runtime(&mut self, status: ActiveStatus) {
+        self.active.insert(status.effect_id.clone(), status);
+    }
+
     pub fn len(&self) -> usize {
         self.active.len()
     }
@@ -292,6 +327,8 @@ pub enum StatusError {
     Unknown(String),
     #[error("duplicate status effect ID {0}")]
     Duplicate(String),
+    #[error("status {id} declares replacement of missing or different target {target}")]
+    InvalidReplacement { id: String, target: String },
     #[error(
         "status {id} field {field} must be >= {minimum} and <= {maximum:?}, received {received}"
     )]
@@ -334,7 +371,14 @@ impl StatusRegistry {
 
     pub fn register(&mut self, definition: StatusDefinition) -> Result<(), StatusError> {
         if self.definitions.contains_key(&definition.id) {
-            return Err(StatusError::Duplicate(definition.id));
+            if definition.replacement_of.as_deref() != Some(definition.id.as_str()) {
+                return Err(StatusError::Duplicate(definition.id));
+            }
+        } else if let Some(target) = &definition.replacement_of {
+            return Err(StatusError::InvalidReplacement {
+                id: definition.id,
+                target: target.clone(),
+            });
         }
         self.definitions.insert(definition.id.clone(), definition);
         Ok(())
@@ -591,6 +635,7 @@ fn status(
 ) -> StatusDefinition {
     StatusDefinition {
         id: id.into(),
+        replacement_of: None,
         name: name.into(),
         categories: categories(&[category]),
         uses_potency: true,
@@ -604,6 +649,8 @@ fn status(
         decay,
         modifiers: Vec::new(),
         tags: BTreeSet::new(),
+        immune_target_tags: BTreeSet::new(),
+        suppresses_categories: BTreeSet::new(),
     }
 }
 
@@ -842,6 +889,37 @@ fn base_definitions() -> Vec<StatusDefinition> {
         Decay::Counter { amount: 1 },
     );
 
+    let mut dark_flame = status(
+        "base:dark-flame",
+        "Dark Flame",
+        Category::DamageOverTime,
+        Tick::DamagePotency {
+            damage_type: Damage::True,
+        },
+        Decay::Counter { amount: 1 },
+    );
+    dark_flame.categories.insert(Category::Debuff);
+    dark_flame.tags.extend(["darkness".into(), "fire".into()]);
+    dark_flame.immune_target_tags.insert("race:demon".into());
+    dark_flame
+        .suppresses_categories
+        .insert(Category::DamageOverTime);
+
+    let mut broken_heart = status(
+        "base:broken-heart",
+        "Broken Heart",
+        Category::Debuff,
+        Tick::None,
+        Decay::Counter { amount: 1 },
+    );
+    broken_heart.potency_min = 15;
+    broken_heart.potency_max = Some(15);
+    broken_heart.fixed_potency = Some(15);
+    broken_heart.modifiers.push(Modifier::DamageDealtPercent {
+        damage_type: None,
+        per_potency_bps: -100,
+    });
+
     let persistent = |id: &str,
                       name: &str,
                       categories_list: &[Category],
@@ -849,6 +927,7 @@ fn base_definitions() -> Vec<StatusDefinition> {
                       counter_max: GameInt| {
         StatusDefinition {
             id: id.into(),
+            replacement_of: None,
             name: name.into(),
             categories: categories(categories_list),
             uses_potency: true,
@@ -862,10 +941,14 @@ fn base_definitions() -> Vec<StatusDefinition> {
             decay: Decay::Counter { amount: 1 },
             modifiers: Vec::new(),
             tags: BTreeSet::new(),
+            immune_target_tags: BTreeSet::new(),
+            suppresses_categories: BTreeSet::new(),
         }
     };
 
     vec![
+        dark_flame,
+        broken_heart,
         burn,
         poison,
         sinking,

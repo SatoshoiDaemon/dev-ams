@@ -2,7 +2,7 @@
 
 A Magic Sovereign is an open-source, offline-first RPG designed to run directly in a terminal. Rust provides the engine, data defines the content, and embedded Lua provides extensible behavior. Players own their saves, configuration, and mods.
 
-The repository contains the initial executable engine layer: deterministic integer arithmetic, attributes and resources, Scaling, action declaration and Priority queues, the damage pipeline, status competition and lifecycle, the data-driven base Glyph catalog, bounded events, `explain last`, editable ZIP saves, deterministic mod discovery, and sandboxed embedded Lua. Exploration, content-rich encounters, and the terminal combat UI remain future layers.
+The repository now contains a playable terminal combat vertical slice: deterministic closed rounds, data-driven actions/statuses/encounters, a Demon demonstration build, embedded sandboxed Lua mods, active-combat ZIP saves, `explain last`, player-readable diagnostics, and a line-oriented CLI. Exploration and the wider game remain future layers; see the [implementation status](docs/dev/vertical-slice-status.md) for the exact boundary.
 
 ## Documentation
 
@@ -41,7 +41,20 @@ cargo test --all-targets --locked
 cargo build --release --locked
 ```
 
-The base Glyph cards are loaded from `data/glyphs.json`; they are content rather than a Rust match table.
+Base actions, entities, encounters, statuses, and racial spell templates are loaded from `data/content/`. Glyph cards are loaded from `data/glyphs.json`; they are content rather than Rust match tables.
+
+## Play the vertical slice
+
+```text
+cargo run --release
+new demo base:standard
+combat base:training-encounter
+actions
+use base:black-flame-orb-demo base:raider-1
+end
+```
+
+Use `help` in each mode. `save` works during combat and `explain last` prints the latest accepted or rejected action trace.
 
 ## Repository checks
 

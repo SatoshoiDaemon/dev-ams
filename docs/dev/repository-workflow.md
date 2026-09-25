@@ -24,7 +24,7 @@ Python and the CI environment are contributor tools. They are not dependencies o
 
 `.github/workflows/engine.yml` uses the declared Rust 1.80 MSRV to run formatting, Clippy with warnings denied, all targets/tests, and release builds on Windows and Linux. A separate Linux job installs `musl-tools`, builds `x86_64-unknown-linux-musl`, and rejects an executable containing a dynamic program interpreter. `Cargo.lock` is tracked for reproducible application builds.
 
-Release publishing is still separate from CI validation. Packaging must additionally verify relative filesystem paths, complete local assets, and launch from a copied installation with no network connection.
+Release publishing is still separate from CI validation. `scripts/package.ps1` and `scripts/package.sh` assemble the portable directory with the executable, license, configuration, data, gamemodes, and visible `saves/mods/logs` directories. CI launches the executable from that copied directory; the musl job also verifies that the Linux executable has no dynamic program interpreter.
 
 Build checks and release packaging must demonstrate these properties before a playable release is advertised. The public repository must distribute the license and the complete portable installation, including `config.toml`, `saves`, `gamemodes`, `mods`, `data`, and `logs` as appropriate.
 

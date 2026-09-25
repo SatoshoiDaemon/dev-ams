@@ -83,7 +83,7 @@ pub enum EventError {
 
 /// Deterministic bounded FIFO event bus. Presentation and Lua integrations can
 /// consume events without becoming responsible for game rules.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct EventBus {
     queue: VecDeque<(u8, CombatEvent)>,
     published_for_action: usize,
@@ -110,6 +110,9 @@ impl EventBus {
     }
     pub fn drain(&mut self) -> impl Iterator<Item = (u8, CombatEvent)> + '_ {
         self.queue.drain(..)
+    }
+    pub fn pop_front(&mut self) -> Option<(u8, CombatEvent)> {
+        self.queue.pop_front()
     }
     pub fn len(&self) -> usize {
         self.queue.len()

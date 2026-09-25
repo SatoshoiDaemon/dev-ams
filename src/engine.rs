@@ -1,10 +1,17 @@
 use crate::{
+    actions::ActionRegistry,
     attributes::AttributeRules,
     combat::{DeterministicRng, ExplanationStore},
+    config::{GameModeRegistry, GamePaths, NumericConfig},
     effects::StatusRegistry,
+    encounters::EncounterRegistry,
     events::CombatEvent,
     glyphs::GlyphRegistry,
+    logging::Logger,
+    magic::SpellTemplateRegistry,
+    session::CombatSession,
 };
+use std::collections::BTreeMap;
 use std::{collections::VecDeque, path::PathBuf};
 pub type Tick = u64;
 pub type GameEvent = CombatEvent;
@@ -20,6 +27,18 @@ pub struct GameState {
     pub status_registry: StatusRegistry,
     pub glyph_registry: GlyphRegistry,
     pub loaded_mods: Vec<String>,
+    pub mod_roots: BTreeMap<String, PathBuf>,
+    pub ruleset_version: String,
+    pub action_registry: ActionRegistry,
+    pub encounter_registry: EncounterRegistry,
+    pub spell_template_registry: SpellTemplateRegistry,
+    pub combat: Option<CombatSession>,
+    pub game_modes: GameModeRegistry,
+    pub global_numeric: NumericConfig,
+    pub lua_max_instructions: u64,
+    pub loaded_mod_versions: BTreeMap<String, String>,
+    pub paths: Option<GamePaths>,
+    pub logger: Option<Logger>,
 }
 impl GameState {
     pub fn new(seed: u64) -> Self {
@@ -34,6 +53,18 @@ impl GameState {
             status_registry: StatusRegistry::base(),
             glyph_registry: GlyphRegistry::default(),
             loaded_mods: Vec::new(),
+            mod_roots: BTreeMap::new(),
+            ruleset_version: "base:standard@1".into(),
+            action_registry: ActionRegistry::default(),
+            encounter_registry: EncounterRegistry::default(),
+            spell_template_registry: SpellTemplateRegistry::default(),
+            combat: None,
+            game_modes: GameModeRegistry::default(),
+            global_numeric: NumericConfig::default(),
+            lua_max_instructions: crate::lua::DEFAULT_MAX_INSTRUCTIONS,
+            loaded_mod_versions: BTreeMap::new(),
+            paths: None,
+            logger: None,
         }
     }
     pub fn emit(&mut self, event: GameEvent) {

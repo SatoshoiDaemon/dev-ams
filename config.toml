@@ -1,5 +1,6 @@
 schema_version = 1
 seed = 305419896
+ruleset_version = "base:standard@1"
 
 [paths]
 saves = "saves"
@@ -17,3 +18,12 @@ tenacity_per_resistance = 10
 mp_per_mana = 10
 power_per_attribute = 7
 tenacity_hp_share_bps = 5000
+
+[logging]
+level = "info"
+combat_debug = false
+keep_sessions = 20
+keep_crash_reports = 50
+
+[lua]
+max_instructions_per_callback = 100000

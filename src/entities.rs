@@ -5,6 +5,7 @@ use crate::{
     numeric::GameInt,
 };
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "snake_case")]
@@ -45,6 +46,10 @@ impl ResourcePool {
 pub struct Entity {
     pub id: StableId,
     pub name: String,
+    #[serde(default)]
+    pub race_id: Option<StableId>,
+    #[serde(default)]
+    pub tags: BTreeSet<String>,
     pub allegiance: Allegiance,
     pub attributes: AttributeSet,
     pub hp: ResourcePool,
@@ -70,6 +75,8 @@ impl Entity {
         Ok(Self {
             id,
             name: name.into(),
+            race_id: None,
+            tags: BTreeSet::new(),
             allegiance,
             attributes,
             hp: ResourcePool::full(derived.max_hp),

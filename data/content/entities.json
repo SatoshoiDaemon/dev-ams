@@ -1,0 +1,21 @@
+[
+  {
+    "id": "base:demon-trainee",
+    "name": "Demon Trainee",
+    "allegiance": "player",
+    "race_id": "base:demon",
+    "tags": ["race:demon", "racial:dread-of-society", "racial:broken-heart"],
+    "attributes": {"vigor": 10, "resistance": 5, "strength": 8, "dexterity": 5, "precision": 5, "intelligence": 10, "mana": 10},
+    "defense": 5,
+    "action_ids": ["base:unarmed-strike", "base:black-flame-orb-demo", "base:guard", "base:parry", "base:flee"]
+  },
+  {
+    "id": "base:training-raider",
+    "name": "Training Raider",
+    "allegiance": "enemy",
+    "tags": ["training_enemy"],
+    "attributes": {"vigor": 3, "resistance": 2, "strength": 5, "dexterity": 3, "precision": 3, "intelligence": 0, "mana": 0},
+    "defense": 3,
+    "action_ids": ["base:training-strike"]
+  }
+]

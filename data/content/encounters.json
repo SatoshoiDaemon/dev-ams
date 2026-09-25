@@ -1,0 +1,10 @@
+[
+  {
+    "id": "base:training-encounter",
+    "actors": [
+      {"instance_id": "base:player", "entity_id": "base:demon-trainee"},
+      {"instance_id": "base:raider-1", "entity_id": "base:training-raider"},
+      {"instance_id": "base:raider-2", "entity_id": "base:training-raider"}
+    ]
+  }
+]

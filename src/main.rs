@@ -6,12 +6,13 @@ fn main() {
         .or_else(|| std::env::current_dir().ok())
         .unwrap_or_else(|| std::path::PathBuf::from("."));
     match ams::initialize(root) {
-        Ok(state) => println!(
-            "A Magic Sovereign — engine ready (seed {}, {} Glyphs, {} mods)",
-            state.seed,
-            state.glyph_registry.len(),
-            state.loaded_mods.len()
-        ),
+        Ok(state) => {
+            let mut app = ams::app::App::new(state);
+            if let Err(error) = app.run() {
+                eprintln!("A Magic Sovereign terminal error: {error}");
+                std::process::exit(1);
+            }
+        }
         Err(error) => {
             eprintln!("A Magic Sovereign failed to start: {error}");
             std::process::exit(1);

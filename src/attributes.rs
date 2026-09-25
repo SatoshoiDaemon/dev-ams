@@ -72,6 +72,7 @@ impl FromStr for Attribute {
             "dexterity" => Ok(Self::Dexterity),
             "precision" => Ok(Self::Precision),
             "intelligence" | "spirit" => Ok(Self::Intelligence),
+            "mana" => Ok(Self::Mana),
             _ => Err(AttributeParseError {
                 received: value.into(),
             }),

@@ -16,7 +16,7 @@
 
 Conteúdo JSON é descoberto recursivamente, ordenado pelo caminho e inserido em um `BTreeMap` por ID estável no formato `namespace:name`. Isso torna a ordem independente do sistema de arquivos.
 
-## Sistemas iniciais implementados
+## Vertical slice implementado
 
 A fundação não visual agora inclui:
 
@@ -25,9 +25,11 @@ A fundação não visual agora inclui:
 - ações, AP, Cast, Priority, TargetSpec e ordenação determinística;
 - Accuracy, Evasion, Parry, Defense, Block, Shield, Tenacity, HP e True Damage;
 - eventos limitados por profundidade/quantidade e pacote substituível de `explain last`;
-- registro e ciclo de vida data-driven de Status Effects;
+- registro e ciclo de vida data-driven de Status Effects em `data/content/statuses.json`;
 - editor de spells e catálogo de Glyphs em `data/glyphs.json`;
 - saves ZIP versionados com JSON e preservação de dados opacos de mods;
-- descoberta determinística de mods e Lua 5.4 embutido sem IO, OS ou carregamento de módulos nativos.
+- descoberta determinística de mods e Lua 5.4 embutido sem IO, OS ou carregamento de módulos nativos;
+- `CombatSession` serializável, rodadas fechadas, Cast, Block/Parry, Bonus Actions, encontro de treino e Demon demonstrativo;
+- CLI textual, saves v2 durante combate, gamemodes, logs históricos e crash reports.
 
-O loop visual de exploração, a interface terminal completa de combate e o conteúdo de encontros continuam como camadas futuras. A API Lua v1 expõe neste momento o runtime seguro e a negociação de versão; handles de mutação/eventos serão conectados conforme os sistemas de host forem compostos no loop da aplicação.
+O loop de exploração e o conteúdo amplo do jogo continuam como camadas futuras. A API Lua v1 já expõe registro no carregamento, queries por cópia, callbacks determinísticos e mutações enfileiradas como `EngineCommand`. O limite exato está documentado em [Combat Vertical Slice Status](vertical-slice-status.md).

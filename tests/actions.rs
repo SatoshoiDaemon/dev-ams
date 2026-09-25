@@ -25,6 +25,7 @@ fn actor(id: &str, allegiance: Allegiance, dexterity: i64) -> Entity {
 fn definition(priority: i64, cast: u32) -> ActionDefinition {
     ActionDefinition {
         id: "base:strike".into(),
+        replacement_of: None,
         source_id: "base:weapon".into(),
         target: TargetSpec {
             mode: TargetMode::Single,
@@ -36,8 +37,11 @@ fn definition(priority: i64, cast: u32) -> ActionDefinition {
         mana_cost: 0,
         cast,
         action_priority: priority,
+        availability: Default::default(),
+        properties: Default::default(),
         requirements: vec![],
         tags: vec!["physical".into()],
+        steps: vec![],
     }
 }
 

@@ -52,6 +52,16 @@ Counter decays at the end of the owning actor's turn unless the status card spec
 
 The required XP to advance from level `L` is `1000 × L + 100`. Level 1 is the starting level. Each level awards one attribute point; every 5th level awards one additional point; every 10th level awards one Node/Glyph slot point. Maximum level is `7000`. Respec costs `100 × current level` Gold, has no cooldown, and cannot lower a level or remove a learned stable ID.
 
+## Initial racial values
+
+The complete behavioral contract is in [Character Creation](../systems/character-creation.md#races). The canonical initial values are:
+
+- Human: `+10%` experience; `+2` additional attribute points per level; Talent Capacity `×1.50`; Talent output `+1%` per `10` character levels; the Talent costs one Standard Action and no additional resource.
+- Demon: recover `1% Max HP` and `1% Max Mana` per qualifying enemy at turn start; racial Haste and Rage each have `2 Potency` per qualifying enemy; `7` Hearts per combat; a Heart crossing grants `20% Max HP` Shield and applies `-15%` outgoing damage for `3 Counter`; Dark Flame ticks for Potency as True Damage and loses `1 Counter` per tick.
+- Angel: healing and Shield caused/received each gain `+20%`; hostile Debuff/DoT/Crowd Control Counter is `×0.75`; Fire, Light, and body-weapon damage each gain `+15%` under their documented combination rules; Spell Capacity is `×1.20`; Expurgo deals `20% Max HP + 50% Missing HP` as True Damage and is `×2` against a Monster or Demon.
+
+All multiplications floor at the named result. The Demon has no racial cap on qualifying-enemy count or the resulting Haste/Rage Potency. Talent growth has no racial cap beyond maximum level. Angel self-healing/self-Shielding receives both the source and recipient modifier additively (`+40%`).
+
 ## Alchemy
 
 Each ingredient contributes four integer channels: Potency, Counter, Mana, and Stability. The generated potion sums channels, then clamps each to `1..100`. Familiarity is `0..100` per exact ingredient multiset. Success chance is:

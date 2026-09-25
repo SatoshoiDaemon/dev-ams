@@ -216,7 +216,7 @@ fn fully_shielded_damage_does_not_emit_on_damage_received() {
 }
 
 #[test]
-fn trigger_families_precede_hp_threshold_and_death_check() {
+fn damage_emits_trigger_families_before_orchestrated_death_check() {
     let mut entity = target();
     entity.hp.current = 60;
     entity.tenacity.current = 0;
@@ -235,5 +235,7 @@ fn trigger_families_precede_hp_threshold_and_death_check() {
             _ => "other",
         })
         .collect::<Vec<_>>();
-    assert_eq!(names, vec!["attack", "damage", "hp", "below", "kill"]);
+    assert_eq!(names, vec!["attack", "damage", "hp", "below"]);
+    assert!(entity.active);
+    assert_eq!(entity.hp.current, 0);
 }

@@ -1,6 +1,6 @@
 # Planning Inventory
 
-This inventory lists the design material preserved for the next planning stage. Unless a page explicitly says otherwise, these are specifications and proposals rather than implemented features.
+This inventory lists the preserved design material. Unless a page explicitly says otherwise, entries are specifications rather than implementation claims. The implemented combat subset is tracked separately in [Combat Vertical Slice Status](vertical-slice-status.md).
 
 ## Gameplay Systems
 
@@ -72,20 +72,26 @@ The separate `wiki-ams` repository contains its README, contribution guide, MIT 
 
 All three directories are independent Git repositories on `main`. `dev-ams` has an initial commit and tracks `git@github.com:Axiom-1337-ts/dev-ams.git`; remote addresses and initial commits for the public and wiki repositories remain separate work.
 
-## Open Decisions
+## Closed by the combat vertical slice
 
-- Complete the initial `ActionRequirement` vocabulary and typed rejection codes for
-  action-specific validation beyond the canonical Targeting contract.
-- Define the internal save ZIP entry layout and implement the first migration/round
-  trip tests. The ownership and unknown mod-data policy is now canonical.
-- Define concrete Rust interfaces as implementation begins. The dependency direction,
-  module ownership, JSON/Lua split, and minimal Lua API v1 are now canonical.
+- The executable now has typed action requirements/rejections for the systems present
+  in the slice. Future equipment/world requirements extend that vocabulary when their
+  owning systems become executable.
+- Save format v2 fixes the initial ZIP layout and has v1 migration plus active-combat
+  round-trip tests.
+- Concrete Rust interfaces now separate terminal, app orchestration, combat systems,
+  data registries, persistence, mod discovery, and the Lua command boundary.
 
 ## Deferred Specifications
 
 The following are intentionally deferred content specifications, not current architectural gaps: Fishing timing and tables; Mining yields and resource respawn; Trial, Arena, Shrine, Cataclysm, Abyss, and Honor of the King tuning; regional encounter weights; environmental hazard schedules; resource distribution; and enemy/content progression. They become implementation requirements when their respective content is being built, unless another active system depends on them earlier.
 
-The former Spirit/Intelligence, Curse, potion Duration/Counter, combat opening, Bonus Action, status lifecycle, and Glyph budget decisions are canonicalized in the relevant system documents and [Numeric Specification Baseline](numeric-specification-baseline.md). They are no longer open design questions, although their implementation and balance tests remain outstanding.
+The former Spirit/Intelligence, Curse, potion Duration/Counter, combat opening,
+Bonus Action, status lifecycle, and Glyph budget decisions are canonicalized in the
+relevant system documents and [Numeric Specification Baseline](numeric-specification-baseline.md).
+Combat opening, Bonus Action limits, and the vertical-slice status lifecycle now have
+executable regression coverage. Broader content integration and balance remain
+versioned future work rather than open engine decisions.
 
 The save ownership philosophy, opaque preservation of unknown mod-owned data, simple
 optional-Lua mod structure, minimal Lua API v1, and deterministic regression-testing

@@ -26,6 +26,21 @@ pub struct DiscoveredMod {
     pub manifest: ModManifest,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ModLoadFailure {
+    pub path: PathBuf,
+    pub mod_id: Option<String>,
+    pub stage: String,
+    pub reason: String,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct ModLoadReport {
+    pub loaded: Vec<DiscoveredMod>,
+    pub failed: Vec<ModLoadFailure>,
+    pub warnings: Vec<String>,
+}
+
 #[derive(Debug, Error)]
 pub enum ModError {
     #[error("failed to enumerate mod directory {path}: {source}")]
@@ -105,6 +120,150 @@ pub fn discover_mods(root: &Path) -> Result<Vec<DiscoveredMod>, ModError> {
         );
     }
     dependency_order(mods)
+}
+
+pub fn discover_mods_report(root: &Path) -> Result<ModLoadReport, ModError> {
+    if !root.exists() {
+        return Ok(ModLoadReport::default());
+    }
+    let mut directories = Vec::new();
+    for entry in fs::read_dir(root).map_err(|source| ModError::ReadDir {
+        path: root.to_path_buf(),
+        source,
+    })? {
+        let path = entry
+            .map_err(|source| ModError::ReadDir {
+                path: root.to_path_buf(),
+                source,
+            })?
+            .path();
+        if path.is_dir() {
+            directories.push(path);
+        }
+    }
+    directories.sort();
+    let mut report = ModLoadReport::default();
+    let mut pending = BTreeMap::new();
+    for directory in directories {
+        let path = directory.join("manifest.json");
+        let manifest = match fs::read_to_string(&path) {
+            Ok(text) => match serde_json::from_str::<ModManifest>(&text) {
+                Ok(manifest) => manifest,
+                Err(error) => {
+                    report.failed.push(ModLoadFailure {
+                        path: path.clone(),
+                        mod_id: None,
+                        stage: "manifest".into(),
+                        reason: error.to_string(),
+                    });
+                    continue;
+                }
+            },
+            Err(error) => {
+                report.failed.push(ModLoadFailure {
+                    path: path.clone(),
+                    mod_id: None,
+                    stage: "manifest".into(),
+                    reason: error.to_string(),
+                });
+                continue;
+            }
+        };
+        if manifest.api_version != MOD_API_VERSION {
+            report.failed.push(ModLoadFailure {
+                path,
+                mod_id: Some(manifest.id.as_str().into()),
+                stage: "API negotiation".into(),
+                reason: format!(
+                    "requires API {}, engine provides {}",
+                    manifest.api_version, MOD_API_VERSION
+                ),
+            });
+            continue;
+        }
+        if pending.contains_key(&manifest.id) {
+            report.failed.push(ModLoadFailure {
+                path,
+                mod_id: Some(manifest.id.as_str().into()),
+                stage: "manifest".into(),
+                reason: "duplicate mod ID".into(),
+            });
+            continue;
+        }
+        pending.insert(
+            manifest.id.clone(),
+            DiscoveredMod {
+                root: directory,
+                manifest,
+            },
+        );
+    }
+    loop {
+        let available: BTreeSet<_> = pending.keys().cloned().collect();
+        let loaded: BTreeSet<_> = report
+            .loaded
+            .iter()
+            .map(|item| item.manifest.id.clone())
+            .collect();
+        let failed_ids: BTreeSet<_> = report
+            .failed
+            .iter()
+            .filter_map(|failure| failure.mod_id.as_deref())
+            .filter_map(|id| StableId::new(id).ok())
+            .collect();
+        let blocked = pending.iter().find_map(|(id, discovered)| {
+            discovered
+                .manifest
+                .dependencies
+                .iter()
+                .find(|dependency| {
+                    !available.contains(*dependency) && !loaded.contains(*dependency)
+                        || failed_ids.contains(*dependency)
+                })
+                .map(|dependency| (id.clone(), dependency.clone()))
+        });
+        if let Some((id, dependency)) = blocked {
+            if let Some(discovered) = pending.remove(&id) {
+                report.failed.push(ModLoadFailure {
+                    path: discovered.root,
+                    mod_id: Some(id.as_str().into()),
+                    stage: "dependency resolution".into(),
+                    reason: format!("missing or failed dependency {dependency}"),
+                });
+            }
+            continue;
+        }
+        let ready = pending
+            .iter()
+            .find(|(_, discovered)| {
+                discovered
+                    .manifest
+                    .dependencies
+                    .iter()
+                    .all(|dependency| loaded.contains(dependency))
+            })
+            .map(|(id, _)| id.clone());
+        match ready {
+            Some(id) => {
+                if let Some(discovered) = pending.remove(&id) {
+                    report.loaded.push(discovered);
+                }
+            }
+            None if pending.is_empty() => break,
+            None => {
+                for (_, discovered) in std::mem::take(&mut pending) {
+                    report.failed.push(ModLoadFailure {
+                        path: discovered.root,
+                        mod_id: Some(discovered.manifest.id.as_str().into()),
+                        stage: "dependency resolution".into(),
+                        reason: "dependency cycle".into(),
+                    });
+                }
+                break;
+            }
+        }
+    }
+    Ok(report)
 }
 
 fn dependency_order(

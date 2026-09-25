@@ -35,3 +35,28 @@ fn content_load_order_is_stable() {
     let ids: Vec<_> = registry.iter().map(|(id, _)| id.as_str()).collect();
     assert_eq!(ids, vec!["base:a", "base:z"]);
 }
+
+#[test]
+fn gamemode_overrides_global_numeric_values_by_internal_id() {
+    let directory = tempfile::tempdir().unwrap();
+    fs::write(
+        directory.path().join("config.toml"),
+        "[numeric]\nhp_per_vigor = 12\nmp_per_mana = 11\n",
+    )
+    .unwrap();
+    let modes = directory.path().join("gamemodes");
+    fs::create_dir(&modes).unwrap();
+    fs::write(
+        modes.join("filename-does-not-define-id.toml"),
+        "id = \"test:mode\"\nruleset_version = \"test:mode@1\"\n[numeric]\nhp_per_vigor = 20\n",
+    )
+    .unwrap();
+    let config = ams::config::AppConfig::load(directory.path()).unwrap();
+    let registry = ams::config::GameModeRegistry::load(&modes).unwrap();
+    let resolved = registry
+        .get("test:mode")
+        .unwrap()
+        .resolve_numeric(&config.numeric);
+    assert_eq!(resolved.hp_per_vigor, 20);
+    assert_eq!(resolved.mp_per_mana, 11);
+}

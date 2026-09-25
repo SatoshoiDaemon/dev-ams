@@ -1,0 +1,89 @@
+[
+  {
+    "id": "base:unarmed-strike",
+    "source_id": "base:unarmed",
+    "target": {"mode": "single", "relation": "enemy", "state": "active", "filters": []},
+    "ap_cost": 100,
+    "mana_cost": 0,
+    "cast": 0,
+    "action_priority": 0,
+    "availability": "combat",
+    "properties": {"offensive": true, "blockable": true, "interruptible": true, "weapon_dependent": true},
+    "requirements": [],
+    "tags": ["physical", "body_weapon"],
+    "steps": [{"kind": "attack", "damage_type": "physical", "flat_damage": 10, "scaling": [{"attribute": "strength", "grade": "C"}]}]
+  },
+  {
+    "id": "base:black-flame-orb-demo",
+    "source_id": "base:black-flame-orb",
+    "target": {"mode": "single", "relation": "enemy", "state": "active", "filters": []},
+    "ap_cost": 100,
+    "mana_cost": 12,
+    "cast": 0,
+    "action_priority": 0,
+    "availability": "combat",
+    "properties": {"offensive": true, "blockable": true, "interruptible": true, "magical": true},
+    "requirements": [],
+    "tags": ["darkness", "fire", "projectile", "spell"],
+    "steps": [
+      {"kind": "attack", "damage_type": "true", "flat_damage": 10, "scaling": [{"attribute": "intelligence", "grade": "C"}]},
+      {"kind": "apply_status", "effect_id": "base:dark-flame", "potency": 10, "counter": 3}
+    ]
+  },
+  {
+    "id": "base:guard",
+    "source_id": "base:guard",
+    "target": {"mode": "self_only", "relation": "self_only", "state": "active", "filters": []},
+    "ap_cost": 50,
+    "mana_cost": 0,
+    "cast": 0,
+    "action_priority": 0,
+    "availability": "combat",
+    "properties": {"offensive": false, "blockable": false, "interruptible": false, "reaction_power": 20},
+    "requirements": [],
+    "tags": ["reaction", "block"],
+    "steps": []
+  },
+  {
+    "id": "base:training-strike",
+    "source_id": "base:training-weapon",
+    "target": {"mode": "single", "relation": "enemy", "state": "active", "filters": []},
+    "ap_cost": 100,
+    "mana_cost": 0,
+    "cast": 0,
+    "action_priority": 0,
+    "availability": "combat",
+    "properties": {"offensive": true, "blockable": true, "interruptible": true, "weapon_dependent": true},
+    "requirements": [],
+    "tags": ["physical", "training"],
+    "steps": [{"kind": "attack", "damage_type": "physical", "flat_damage": 8, "scaling": [{"attribute": "strength", "grade": "D"}]}]
+  },
+  {
+    "id": "base:parry",
+    "source_id": "base:parry",
+    "target": {"mode": "self_only", "relation": "self_only", "state": "active", "filters": []},
+    "ap_cost": 50,
+    "mana_cost": 0,
+    "cast": 0,
+    "action_priority": 0,
+    "availability": "combat",
+    "properties": {"offensive": false, "blockable": false, "interruptible": false, "reaction_power": 20},
+    "requirements": [],
+    "tags": ["reaction", "parry"],
+    "steps": []
+  },
+  {
+    "id": "base:flee",
+    "source_id": "base:combat",
+    "target": {"mode": "none", "relation": "any", "state": "any", "filters": []},
+    "ap_cost": 0,
+    "mana_cost": 0,
+    "cast": 0,
+    "action_priority": 0,
+    "availability": "combat",
+    "properties": {"offensive": false, "blockable": false, "interruptible": false},
+    "requirements": [],
+    "tags": ["flee"],
+    "steps": [{"kind": "flee"}]
+  }
+]

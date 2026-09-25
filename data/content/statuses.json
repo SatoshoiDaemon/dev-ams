@@ -1,0 +1,73 @@
+[
+  {
+    "id": "base:dark-flame",
+    "name": "Dark Flame",
+    "categories": ["damage_over_time", "debuff"],
+    "tick": {"kind": "damage_potency", "damage_type": "true"},
+    "decay": {"kind": "counter", "amount": 1},
+    "tags": ["darkness", "fire", "tick_capable"],
+    "immune_target_tags": ["race:demon"],
+    "suppresses_categories": ["damage_over_time"]
+  },
+  {
+    "id": "base:broken-heart",
+    "name": "Broken Heart",
+    "categories": ["debuff"],
+    "potency_min": 15,
+    "potency_max": 15,
+    "fixed_potency": 15,
+    "decay": {"kind": "counter", "amount": 1},
+    "modifiers": [{"kind": "damage_dealt_percent", "damage_type": null, "per_potency_bps": -100}]
+  },
+  {
+    "id": "base:burn",
+    "name": "Burn",
+    "categories": ["damage_over_time"],
+    "tick": {"kind": "damage_potency", "damage_type": "magical"},
+    "decay": {"kind": "both", "potency": 1, "counter": 1},
+    "tags": ["tick_capable"]
+  },
+  {
+    "id": "base:poison",
+    "name": "Poison",
+    "categories": ["damage_over_time"],
+    "tick": {"kind": "poison"},
+    "decay": {"kind": "halve_counter"},
+    "tags": ["tick_capable"]
+  },
+  {"id":"base:sinking","name":"Sinking","categories":["damage_over_time"],"tick":{"kind":"resource_loss_potency"},"decay":{"kind":"counter","amount":1}},
+  {"id":"base:electrified","name":"Electrified","categories":["damage_over_time"],"tick":{"kind":"electrified"},"decay":{"kind":"counter","amount":1}},
+  {"id":"base:bleed","name":"Bleed","categories":["damage_over_time"],"decay":{"kind":"halve_both"}},
+
+  {"id":"base:stun","name":"Stun","categories":["crowd_control"],"potency_min":1,"potency_max":1,"fixed_potency":1,"counter_max":5,"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"action_restriction","tag":"cannot_attack_or_evade"}]},
+  {"id":"base:binding","name":"Binding","categories":["crowd_control"],"potency_min":1,"potency_max":1,"fixed_potency":1,"counter_max":5,"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"action_restriction","tag":"cannot_move_or_use_physical"}]},
+  {"id":"base:silent","name":"Silent","categories":["crowd_control"],"potency_min":1,"potency_max":1,"fixed_potency":1,"counter_max":5,"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"action_restriction","tag":"cannot_cast_magic"}]},
+  {"id":"base:fear","name":"Fear","categories":["crowd_control"],"potency_min":1,"potency_max":1,"fixed_potency":1,"counter_max":5,"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"action_restriction","tag":"cannot_attack_source"},{"kind":"evasion_percent","per_potency_bps":-100}]},
+  {"id":"base:taunt","name":"Taunt","categories":["crowd_control"],"potency_min":1,"potency_max":1,"fixed_potency":1,"counter_max":5,"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"action_restriction","tag":"attack_only_source"},{"kind":"damage_dealt_percent","damage_type":null,"per_potency_bps":-100}]},
+  {"id":"base:charm","name":"Charm","categories":["crowd_control"],"potency_min":1,"potency_max":1,"fixed_potency":1,"counter_max":5,"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"action_restriction","tag":"cannot_attack_source"},{"kind":"damage_received_percent","hp_only":false,"per_potency_bps":100}]},
+
+  {"id":"base:protect","name":"Protect","categories":["buff"],"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"damage_received_percent","hp_only":false,"per_potency_bps":-100}]},
+  {"id":"base:haste","name":"Haste","categories":["buff"],"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"evasion_percent","per_potency_bps":100},{"kind":"priority_percent","per_potency_bps":100}]},
+  {"id":"base:rage","name":"Rage","categories":["buff"],"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"damage_dealt_percent","damage_type":"physical","per_potency_bps":100}]},
+  {"id":"base:overdrive","name":"Overdrive","categories":["buff"],"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"mana_regeneration_percent","per_potency_bps":100}]},
+  {"id":"base:sage","name":"Sage","categories":["buff"],"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"damage_dealt_percent","damage_type":"magical","per_potency_bps":100}]},
+  {"id":"base:heal","name":"Heal","categories":["buff"],"uses_counter":false,"counter_min":0,"counter_max":0,"tick":{"kind":"heal_percent_max_hp"}},
+  {"id":"base:shield","name":"Shield","categories":["buff"],"uses_counter":false,"potency_max":null,"counter_min":0,"counter_max":0,"tick":{"kind":"create_shield"}},
+  {"id":"base:blessing","name":"Blessing","categories":["buff"],"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"healing_and_shield_percent","per_potency_bps":100}]},
+
+  {"id":"base:fragile","name":"Fragile","categories":["debuff"],"decay":{"kind":"counter_by_potency"},"modifiers":[{"kind":"damage_received_percent","hp_only":true,"per_potency_bps":100}]},
+  {"id":"base:tremor","name":"Tremor","categories":["debuff"],"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"damage_received_percent","hp_only":false,"per_potency_bps":100}]},
+  {"id":"base:rupture","name":"Rupture","categories":["debuff"],"decay":{"kind":"potency","amount":1},"modifiers":[{"kind":"tenacity_ignore_percent","per_potency_bps":100}]},
+  {"id":"base:exhaust","name":"Exhaust","categories":["debuff"],"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"evasion_percent","per_potency_bps":-100},{"kind":"priority_percent","per_potency_bps":-100}]},
+  {"id":"base:attack-down","name":"Attack Down","categories":["debuff"],"decay":{"kind":"counter","amount":1},"modifiers":[{"kind":"damage_dealt_percent","damage_type":null,"per_potency_bps":-100}]},
+  {"id":"base:curse","name":"Curse","categories":["debuff"],"decay":{"kind":"counter","amount":1}},
+
+  {"id":"base:reveal-lock","name":"Reveal Lock","categories":["debuff"],"potency_max":1,"counter_max":3,"decay":{"kind":"counter","amount":1}},
+  {"id":"base:shadow-debt","name":"Shadow Debt","categories":["debuff"],"potency_max":20,"counter_max":10,"decay":{"kind":"counter","amount":1}},
+  {"id":"base:erosion","name":"Erosion","categories":["debuff"],"potency_max":50,"counter_max":3,"decay":{"kind":"counter","amount":1}},
+  {"id":"base:resonance","name":"Resonance","categories":["buff"],"potency_max":3,"counter_max":3,"decay":{"kind":"counter","amount":1}},
+  {"id":"base:cryostasis","name":"Cryostasis","categories":["neutral"],"potency_max":1,"counter_max":2,"decay":{"kind":"counter","amount":1}},
+  {"id":"base:molten-ground","name":"Molten Ground","categories":["debuff","area"],"potency_max":50,"counter_max":3,"decay":{"kind":"counter","amount":1}},
+  {"id":"base:electrified-network","name":"Electrified Network","categories":["debuff"],"potency_max":6,"counter_max":3,"decay":{"kind":"counter","amount":1}},
+  {"id":"base:plant-growth","name":"Plant Growth","categories":["buff"],"potency_max":5,"counter_max":5,"decay":{"kind":"counter","amount":1}}
+]

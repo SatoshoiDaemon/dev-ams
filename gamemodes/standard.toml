@@ -1,0 +1,4 @@
+id = "base:standard"
+ruleset_version = "base:standard@1"
+
+[numeric]

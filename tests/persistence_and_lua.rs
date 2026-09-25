@@ -6,7 +6,8 @@ use ams::{
     saves::{read_save, write_save, SaveData, SaveMetadata, SAVE_FORMAT_VERSION},
 };
 use serde_json::json;
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, fs::File, io::Write};
+use zip::{write::SimpleFileOptions, ZipWriter};
 
 #[test]
 fn save_round_trip_preserves_human_readable_opaque_mod_data() {
@@ -30,9 +31,15 @@ fn save_round_trip_preserves_human_readable_opaque_mod_data() {
             save_format_version: SAVE_FORMAT_VERSION,
             ruleset_version: "1".into(),
             required_mods: vec![],
+            gamemode_id: "base:standard".into(),
+            player_entity_ids: vec!["base:hero".into()],
+            rng_state: 1,
         },
+        ruleset: json!({"ruleset_version": "1"}),
         entities: vec![entity],
+        combat: None,
         opaque_mod_data: opaque,
+        migration_warnings: Vec::new(),
     };
     write_save(&path, &original).unwrap();
     assert_eq!(read_save(&path).unwrap(), original);
@@ -52,4 +59,29 @@ fn lua_runtime_is_embedded_versioned_and_has_no_os_access() {
         .get::<mlua::Value>("package")
         .unwrap()
         .is_nil());
+}
+
+#[test]
+fn v1_save_migrates_without_combat_and_reports_missing_snapshot() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("legacy.zip");
+    let mut archive = ZipWriter::new(File::create(&path).unwrap());
+    let options = SimpleFileOptions::default();
+    archive.start_file("metadata.json", options).unwrap();
+    archive
+        .write_all(br#"{"save_format_version":1,"ruleset_version":"base:standard@1"}"#)
+        .unwrap();
+    archive.start_file("entities.json", options).unwrap();
+    archive.write_all(b"[]").unwrap();
+    archive.start_file("mod_data.json", options).unwrap();
+    archive
+        .write_all(br#"{"missing:legacy":{"kept":true}}"#)
+        .unwrap();
+    archive.finish().unwrap();
+
+    let migrated = read_save(&path).unwrap();
+    assert_eq!(migrated.metadata.save_format_version, SAVE_FORMAT_VERSION);
+    assert!(migrated.combat.is_none());
+    assert_eq!(migrated.opaque_mod_data["missing:legacy"]["kept"], true);
+    assert_eq!(migrated.migration_warnings.len(), 1);
 }

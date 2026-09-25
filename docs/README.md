@@ -2,7 +2,7 @@
 
 This is the initial design reference for A Magic Sovereign. Each independent system has a dedicated Markdown document; related internal mechanics stay together. All documentation is in English.
 
-These documents describe design requirements and proposals, not an implemented game. Preserve tentative language and explicit open questions. The repository's [architectural requirements](../AGENTS.md) still apply; conflicts between initial drafts and those requirements are called out rather than silently resolved.
+Most system pages describe design requirements and proposals rather than completed gameplay. The [combat vertical slice status](dev/vertical-slice-status.md) is the authoritative inventory of what the executable currently implements. Preserve tentative language and explicit open questions elsewhere.
 
 ## Gameplay Systems
 
@@ -44,6 +44,8 @@ The [NPC documentation area](npc/README.md) is reserved for dedicated character 
 
 ## Development
 
+- [Combat vertical slice status](dev/vertical-slice-status.md): implemented, partial, and future boundaries plus the playable CLI path.
+- [Vertical slice schemas](dev/vertical-slice-schemas.md): content, mod/Lua, gamemode, save v2, and CLI contracts.
 - [Planning inventory](dev/planning-inventory.md): catalog of preserved systems, world material, repository assets, and open decisions for the next planning stage.
 - [Numeric design framework](dev/numeric-design.md): deterministic units, rounding, modifiers, status contracts, curve primitives, and test requirements.
 - [Numeric coverage audit](dev/numeric-audit.md): completeness and priority matrix for gameplay, endgame, and world systems.

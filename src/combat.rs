@@ -356,14 +356,6 @@ pub fn resolve_damage(
             });
         }
     }
-    if before.hp > 0 && target.hp.current == 0 {
-        target.active = false;
-        events.push(CombatEvent::OnKill {
-            source_id: request.source_id.clone(),
-            target_id: request.target_id.clone(),
-        });
-    }
-
     let after = ResourceSnapshot {
         shield: target.shield,
         tenacity: target.tenacity.current,
@@ -613,6 +605,8 @@ pub enum CombatOutcome {
 pub struct ExplainLast {
     pub ruleset_version: String,
     pub rng_seed: u64,
+    #[serde(default)]
+    pub rng_state_before: u64,
     pub rng_state_after: u64,
     pub actor_id: String,
     pub action_id: String,
@@ -620,6 +614,18 @@ pub struct ExplainLast {
     pub declared_round: u64,
     pub resolved: bool,
     pub rejection_reason: Option<String>,
+    #[serde(default)]
+    pub payment_ap: GameInt,
+    #[serde(default)]
+    pub payment_mana: GameInt,
+    #[serde(default)]
+    pub eligible_round: u64,
+    #[serde(default)]
+    pub queue_position: Option<usize>,
+    #[serde(default)]
+    pub action_stages: Vec<DamageStage>,
+    #[serde(default)]
+    pub trigger_order: Vec<String>,
     pub attack: Option<AttackResult>,
     pub damage: Option<DamageResult>,
     pub events: Vec<CombatEvent>,
@@ -667,6 +673,7 @@ pub fn resolve_attack_action(
     attack_request: &AttackRequest,
     damage_request: &DamageRequest,
 ) -> Result<ResolvedAttackAction, CombatError> {
+    let rng_state_before = rng.state();
     let attack = resolve_attack(attack_request, rng)?;
     let damage = if attack.outcome == AttackOutcome::Connected {
         Some(resolve_damage(target, damage_request)?)
@@ -680,6 +687,7 @@ pub fn resolve_attack_action(
     explanations.replace(ExplainLast {
         ruleset_version: context.ruleset_version.clone(),
         rng_seed: context.seed,
+        rng_state_before,
         rng_state_after: rng.state(),
         actor_id: attack_request.source_id.clone(),
         action_id: context.action_id.clone(),
@@ -687,6 +695,12 @@ pub fn resolve_attack_action(
         declared_round: context.round,
         resolved: true,
         rejection_reason: None,
+        payment_ap: 0,
+        payment_mana: 0,
+        eligible_round: context.round,
+        queue_position: None,
+        action_stages: Vec::new(),
+        trigger_order: Vec::new(),
         attack: Some(attack.clone()),
         damage: damage.clone(),
         events,
@@ -707,6 +721,7 @@ pub fn explain_rejection(explanations: &mut ExplanationStore, rejection: Rejecti
     explanations.replace(ExplainLast {
         ruleset_version: rejection.context.ruleset_version,
         rng_seed: rejection.context.seed,
+        rng_state_before: rejection.rng_state,
         rng_state_after: rejection.rng_state,
         actor_id: rejection.actor_id,
         action_id: rejection.context.action_id,
@@ -714,6 +729,12 @@ pub fn explain_rejection(explanations: &mut ExplanationStore, rejection: Rejecti
         declared_round: rejection.context.round,
         resolved: false,
         rejection_reason: Some(rejection.reason),
+        payment_ap: 0,
+        payment_mana: 0,
+        eligible_round: rejection.context.round,
+        queue_position: None,
+        action_stages: Vec::new(),
+        trigger_order: Vec::new(),
         attack: None,
         damage: None,
         events: Vec::new(),

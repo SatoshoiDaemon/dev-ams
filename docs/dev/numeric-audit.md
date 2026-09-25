@@ -15,14 +15,14 @@ This is a status document, not an authority over system pages. The latest canoni
 
 | System | Current numeric coverage | Main gaps | Priority |
 | --- | --- | --- | --- |
-| Attributes and resources | Base conversions, Intelligence identity, resource bases, regeneration, and debuff reduction are defined. | Implementation tests; secondary behavior can remain content/balance work | P1 |
-| Scaling | Grade multipliers, single/multiple contributions, floor points, and pre-mitigation placement are defined. | Content-specific combinations and exceptional-grade availability are deferred until content needs them | P2 |
-| Combat damage | Pipeline, floor rounding, shared Defense, typed penetration, Shield order, Tenacity split, AP, Cast, Priority, Accuracy, Evasion, Parry, Block, and Fleeing are defined. | Implementation tests | P1 |
-| Status effects | Potency/Counter model, default caps, competition, decay, damage types, Curse, Poison replacement, and resistance curve are defined. | Implementation tests and balance tuning | P1 |
-| Glyphs | Canonical quantified specification now exists for all catalogued Glyphs, including Weight, status budget, limits, timing, cooldowns, validation, and test vectors. | Balance tuning may change versioned defaults; no implementation-blocking numeric gap remains. | Completed/P0 |
+| Attributes and resources | Base conversions, Power, HP, Tenacity, and Mana are implemented and regression-tested for the slice; regeneration and secondary behavior remain canonical contracts. | Connect future subsystem/content uses and add their tests when executable | Implemented slice/P2 |
+| Scaling | Grade multipliers, multiple declared sources, floor points, and pre-mitigation placement are implemented and tested. | Connect equipment, catalyst, Glyph, and Fighting Style sources when those systems become executable | Implemented slice/P2 |
+| Combat damage | Pipeline, floor rounding, shared Defense, Shield order, Tenacity split, AP, Cast, Priority, Accuracy, Evasion, Parry, Block, Fleeing, events, and delayed death confirmation are implemented and tested. | Broader content and balance vectors only | Implemented slice/P2 |
+| Status effects | Potency/Counter competition, Resistance, ticks, decay, removal, immunity, and the base data catalog are implemented and tested. | Complete content-specific semantics outside the demonstration and continue balance tuning | Implemented slice/P2 |
+| Glyphs | The canonical catalog, registry, validation, and spell-template references exist. | Executable semantics remain partial where Glyphs depend on editors, equipment, spatial rules, exploration, or other future systems | Partial/P2 |
 | Sigils | Canonical triggers, magnitudes, reserves, marks, switching, cooldowns, ownership, and event mapping are defined. | Implementation tests and balance tuning | P1 |
-| Priority | Base formula, contribution coefficients, tie-breaker, Cast separation, and AP separation are defined; Priority has no balance cap. | Implementation tests | P1 |
-| Bonus Actions | AP cost, insertion limits, trigger depth, per-round limits, and source repetition rules are defined. | Implementation tests and content-specific triggers | P1 |
+| Priority | Base formula, contribution coefficients, stable tie-breakers, Cast separation, and AP separation are implemented and tested; Priority has no balance cap. | Broader content vectors only | Implemented slice/P2 |
+| Bonus Actions | AP cost, queue insertion, depth, per-round limits, and source repetition rules are implemented and tested. | Content-specific trigger definitions | Implemented slice/P2 |
 | Character progression | XP curve, level rewards, maximum level, and respec costs are defined. | Implementation tests and content progression | P1 |
 | Fighting Styles | Mastery curve, Node costs, cross-influence coefficients, and unlock thresholds are defined. | Implementation tests and content authoring | P1 |
 | Equipment | Slots, item budgets, level growth, material coefficients, weight, requirements, armor, and penetration are defined. | Implementation tests and content authoring | P1 |
@@ -62,11 +62,18 @@ This is a status document, not an authority over system pages. The latest canoni
 
 The current implementation baseline is [Numeric Specification Baseline](numeric-specification-baseline.md), and the current Glyph contract is [Canonical Quantified Specification](../systems/glyphs.md#canonical-quantified-specification).
 
-1. Implement and test the canonical combat contract, including AttackContext, DamageContext, AP, Cast, Priority, Accuracy, Evasion, Parry, Block, shared Defense, Shield, and event ordering.
-2. Connect equipment, spell, catalyst, Glyph, and Fighting Style Scaling through declared data sources.
-3. Define and test remaining action-target validation rules.
-4. Implement and test progression, direct recipes, alchemy, simple currency, gathering, and companion rules from their canonical pages.
-5. Implement deferred content specifications only when the corresponding content enters development.
+1. Verify the portable Windows and static-musl artifacts on remote CI and preserve
+   deterministic copied-directory smoke tests.
+2. Extend declarative requirements and unresolved-reference handling when equipment
+   and inventory become executable.
+3. Connect equipment, spell, catalyst, Glyph, and Fighting Style Scaling through the
+   existing declared data-source pipeline.
+4. Implement the non-spatial Glyph/editor subset, then add spatial primitives only
+   alongside an executable exploration/world slice.
+5. Implement progression, direct recipes, alchemy, simple currency, gathering, and
+   companion rules from their canonical pages when those systems enter development.
+6. Define deferred balance/content values only when the corresponding content is
+   actively being built.
 
 ## Definition of Numerically Planned
 
