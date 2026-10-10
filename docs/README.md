@@ -44,7 +44,7 @@ The [NPC documentation area](npc/README.md) is reserved for dedicated character 
 
 ## Development
 
-- [Combat vertical slice status](dev/vertical-slice-status.md): implemented, partial, and future boundaries plus the playable CLI path.
+- [Combat vertical slice status](dev/vertical-slice-status.md): implemented, partial, and future boundaries plus the playable TUI and CLI paths.
 - [Vertical slice schemas](dev/vertical-slice-schemas.md): content, mod/Lua, gamemode, save v2, and CLI contracts.
 - [Planning inventory](dev/planning-inventory.md): catalog of preserved systems, world material, repository assets, and open decisions for the next planning stage.
 - [Numeric design framework](dev/numeric-design.md): deterministic units, rounding, modifiers, status contracts, curve primitives, and test requirements.

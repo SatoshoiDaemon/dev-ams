@@ -1,0 +1,6 @@
+[
+  {"id":"core:tidal_town","name":"Tidal Town","description":"O som das ondas atravessa as ruas. Sete dias se passaram desde que você despertou neste mundo. Você ainda não sabe quem o trouxe até aqui.","destinations":["core:tidal_town_square","core:tidal_town_docks","core:tidal_town_gate"]},
+  {"id":"core:tidal_town_square","name":"Praça de Tidal Town","description":"A praça central da cidade.","destinations":["core:tidal_town"]},
+  {"id":"core:tidal_town_docks","name":"Doca de Tidal Town","description":"As docas acompanham o movimento das marés.","destinations":["core:tidal_town"]},
+  {"id":"core:tidal_town_gate","name":"Portão de Tidal Town","description":"O caminho para fora da cidade começa no portão.","destinations":["core:tidal_town"]}
+]

@@ -1,7 +1,10 @@
 use crate::{
     actions::{ActionDefinition, TargetMode},
+    attributes::AttributeSet,
+    campaign::{self, CampaignProgress, PlayerCharacter},
     combat::{explain_rejection, ActionTraceContext, DeterministicRng, RejectionTrace},
     engine::GameState,
+    entities::{Allegiance, Entity},
     logging::DiagnosticContext,
     lua::{LuaWorldSnapshot, ModRuntime},
     runtime::{
@@ -36,6 +39,53 @@ pub enum AppMode {
     Combat,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum AppAction {
+    Help,
+    NewGame {
+        save_name: String,
+        gamemode_id: String,
+    },
+    NewCharacter {
+        save_name: String,
+        character_name: String,
+        race_id: String,
+        elements: Vec<crate::glyphs::Element>,
+        gamemode_id: String,
+    },
+    AdvanceScene,
+    SkipPrologue,
+    MoveToLocation {
+        location_id: String,
+    },
+    RequestLoad {
+        save_name: String,
+    },
+    ConfirmLoad,
+    ConfirmQuit,
+    CancelPending,
+    ListSaves,
+    Status,
+    StartCombat {
+        encounter_id: String,
+    },
+    ListActions,
+    UseAction {
+        action_id: String,
+        target_ids: Vec<String>,
+    },
+    ReserveReaction {
+        action_id: String,
+    },
+    EndRound,
+    Save,
+    ExplainLast,
+    SetVerbose(bool),
+    Flee,
+    ReturnToMenu,
+    RequestQuit,
+}
+
 pub struct App {
     pub state: GameState,
     terminal: PlainTerminal,
@@ -43,6 +93,11 @@ pub struct App {
     pub verbose: bool,
     pub should_exit: bool,
     pub dirty: bool,
+    pub mod_load_failures: Vec<crate::modding::ModLoadFailure>,
+    opaque_mod_data: BTreeMap<String, serde_json::Value>,
+    pub player: Option<Entity>,
+    pub character: Option<PlayerCharacter>,
+    pub campaign: Option<CampaignProgress>,
     save_name: Option<String>,
     gamemode_id: String,
     pending_load: Option<String>,
@@ -52,7 +107,7 @@ pub struct App {
 
 impl App {
     pub fn new(mut state: GameState) -> Self {
-        let lua_runtimes = load_mod_extensions(&mut state);
+        let (lua_runtimes, mod_load_failures) = load_mod_extensions(&mut state);
         Self {
             state,
             terminal: PlainTerminal,
@@ -60,6 +115,11 @@ impl App {
             verbose: false,
             should_exit: false,
             dirty: false,
+            mod_load_failures,
+            opaque_mod_data: BTreeMap::new(),
+            player: None,
+            character: None,
+            campaign: None,
             save_name: None,
             gamemode_id: "base:standard".into(),
             pending_load: None,
@@ -128,46 +188,137 @@ impl App {
         self.terminal.render(message);
     }
 
+    pub fn save_name(&self) -> Option<&str> {
+        self.save_name.as_deref()
+    }
+
     pub fn command(&mut self, input: &str) -> String {
         let trimmed = input.trim();
         if trimmed.is_empty() {
             return String::new();
         }
         let parts = trimmed.split_whitespace().collect::<Vec<_>>();
-        if parts.first() == Some(&"confirm") {
-            return self.confirm(&parts[1..]);
-        }
-        match parts[0] {
-            "help" => self.help(),
-            "new" => self.new_game(&parts[1..]),
-            "load" => self.request_load(&parts[1..]),
-            "saves" => self.list_saves(),
-            "status" => self.status(),
-            "combat" => self.start_combat(&parts[1..]),
-            "actions" => self.actions(),
-            "use" => self.use_action(&parts[1..]),
-            "reserve" => self.reserve(&parts[1..]),
-            "end" => self.end_round(),
-            "save" => self.save(),
-            "explain" if parts.get(1) == Some(&"last") => self
+        let args = &parts[1..];
+        let action = match parts[0] {
+            "help" => AppAction::Help,
+            "new" => {
+                if args.is_empty() {
+                    return "Usage: new <save-name> [gamemode-id]".into();
+                }
+                let mode_index = args
+                    .last()
+                    .filter(|candidate| self.state.game_modes.get(candidate).is_some())
+                    .map(|_| args.len() - 1);
+                let name_end = mode_index.unwrap_or(args.len());
+                AppAction::NewGame {
+                    save_name: args[..name_end].join(" "),
+                    gamemode_id: mode_index
+                        .map(|index| args[index].to_owned())
+                        .unwrap_or_else(|| "base:standard".into()),
+                }
+            }
+            "load" if !args.is_empty() => AppAction::RequestLoad {
+                save_name: args.join(" "),
+            },
+            "load" => return "Usage: load <save-name>".into(),
+            "saves" => AppAction::ListSaves,
+            "status" => AppAction::Status,
+            "combat" => AppAction::StartCombat {
+                encounter_id: args
+                    .first()
+                    .copied()
+                    .unwrap_or("base:training-encounter")
+                    .into(),
+            },
+            "actions" => AppAction::ListActions,
+            "use" if !args.is_empty() => AppAction::UseAction {
+                action_id: args[0].into(),
+                target_ids: args[1..].iter().map(|value| (*value).into()).collect(),
+            },
+            "use" => return "Usage: use <action-id> [target-id...]".into(),
+            "reserve" if !args.is_empty() => AppAction::ReserveReaction {
+                action_id: args[0].into(),
+            },
+            "reserve" => return "Usage: reserve <reaction-id>".into(),
+            "end" => AppAction::EndRound,
+            "save" => AppAction::Save,
+            "explain" if args.first() == Some(&"last") => AppAction::ExplainLast,
+            "log" if args.first() == Some(&"normal") => AppAction::SetVerbose(false),
+            "log" if args.first() == Some(&"verbose") => AppAction::SetVerbose(true),
+            "flee" => AppAction::Flee,
+            "menu" => AppAction::ReturnToMenu,
+            "quit" => AppAction::RequestQuit,
+            "cancel" => AppAction::CancelPending,
+            "confirm" if args.first() == Some(&"load") => AppAction::ConfirmLoad,
+            "confirm" if args.first() == Some(&"quit") => AppAction::ConfirmQuit,
+            command => return format!("Unknown command: {command}. Type 'help'."),
+        };
+        self.dispatch(action)
+    }
+
+    pub fn dispatch(&mut self, action: AppAction) -> String {
+        match action {
+            AppAction::Help => self.help(),
+            AppAction::NewGame {
+                save_name,
+                gamemode_id,
+            } => self.new_game(&save_name, &gamemode_id),
+            AppAction::NewCharacter {
+                save_name,
+                character_name,
+                race_id,
+                elements,
+                gamemode_id,
+            } => self.new_character(
+                &save_name,
+                &character_name,
+                &race_id,
+                elements,
+                &gamemode_id,
+            ),
+            AppAction::AdvanceScene => self.advance_scene(),
+            AppAction::SkipPrologue => self.skip_prologue(),
+            AppAction::MoveToLocation { location_id } => self.move_to_location(&location_id),
+            AppAction::RequestLoad { save_name } => self.request_load(&save_name),
+            AppAction::ConfirmLoad => self.confirm(&["load"]),
+            AppAction::ConfirmQuit => self.confirm(&["quit"]),
+            AppAction::CancelPending => {
+                self.pending_load = None;
+                self.pending_quit = false;
+                "Pending operation cancelled.".into()
+            }
+            AppAction::ListSaves => self.list_saves(),
+            AppAction::Status => self.status(),
+            AppAction::StartCombat { encounter_id } => self.start_combat(&[&encounter_id]),
+            AppAction::ListActions => self.actions(),
+            AppAction::UseAction {
+                action_id,
+                target_ids,
+            } => self.use_action(&action_id, &target_ids),
+            AppAction::ReserveReaction { action_id } => self.reserve(&action_id),
+            AppAction::EndRound => self.end_round(),
+            AppAction::Save => self.save(),
+            AppAction::ExplainLast => self
                 .state
                 .explanations
                 .render_json()
                 .map(|value| value.unwrap_or_else(|| "No completed action to explain.".into()))
                 .unwrap_or_else(|error| format!("Failed to render explain last: {error}")),
-            "log" => self.set_log_mode(&parts[1..]),
-            "flee" => self.flee(),
-            "menu" => {
+            AppAction::SetVerbose(verbose) => {
+                self.verbose = verbose;
+                if verbose {
+                    "Combat output set to verbose."
+                } else {
+                    "Combat output set to normal."
+                }
+                .into()
+            }
+            AppAction::Flee => self.flee(),
+            AppAction::ReturnToMenu => {
                 self.mode = AppMode::Menu;
                 "Returned to menu.".into()
             }
-            "quit" => self.request_quit(),
-            "cancel" => {
-                self.pending_load = None;
-                self.pending_quit = false;
-                "Pending operation cancelled.".into()
-            }
-            command => format!("Unknown command: {command}. Type 'help'."),
+            AppAction::RequestQuit => self.request_quit(),
         }
     }
 
@@ -179,14 +330,36 @@ impl App {
         }
     }
 
-    fn new_game(&mut self, arguments: &[&str]) -> String {
-        let Some(name) = arguments.first() else {
-            return "Usage: new <save-name> [gamemode-id]".into();
-        };
+    fn new_game(&mut self, name: &str, gamemode: &str) -> String {
         if let Err(error) = validate_save_name(name) {
             return error.to_string();
         }
-        let gamemode = arguments.get(1).copied().unwrap_or("base:standard");
+        if let Some(paths) = &self.state.paths {
+            let requested = name.to_lowercase();
+            match fs::read_dir(&paths.saves) {
+                Ok(entries) => {
+                    for entry in entries {
+                        let entry = match entry {
+                            Ok(entry) => entry,
+                            Err(error) => {
+                                return format!("Cannot check existing saves: {error}");
+                            }
+                        };
+                        let path = entry.path();
+                        let is_zip = path
+                            .extension()
+                            .is_some_and(|extension| extension.eq_ignore_ascii_case("zip"));
+                        let same_name = path
+                            .file_stem()
+                            .is_some_and(|stem| stem.to_string_lossy().to_lowercase() == requested);
+                        if is_zip && same_name {
+                            return format!("A save named '{name}' already exists.");
+                        }
+                    }
+                }
+                Err(error) => return format!("Cannot check existing saves: {error}"),
+            }
+        }
         let Some(mode) = self.state.game_modes.get(gamemode) else {
             return format!("Unknown game mode {gamemode}");
         };
@@ -195,6 +368,10 @@ impl App {
             .attribute_rules();
         self.state.ruleset_version = mode.ruleset_version.clone();
         self.state.combat = None;
+        self.player = None;
+        self.character = None;
+        self.campaign = None;
+        self.opaque_mod_data.clear();
         self.state.rng = DeterministicRng::new(self.state.seed);
         self.save_name = Some((*name).into());
         self.gamemode_id = gamemode.into();
@@ -203,10 +380,176 @@ impl App {
         format!("Created Demon save '{name}' using {gamemode}.")
     }
 
-    fn request_load(&mut self, arguments: &[&str]) -> String {
-        let Some(name) = arguments.first() else {
-            return "Usage: load <save-name>".into();
+    fn new_character(
+        &mut self,
+        save_name: &str,
+        character_name: &str,
+        race_id: &str,
+        elements: Vec<crate::glyphs::Element>,
+        gamemode: &str,
+    ) -> String {
+        if let Err(error) = validate_save_name(save_name) {
+            return error.to_string();
+        }
+        let name_chars = character_name.chars().count();
+        if character_name.trim().is_empty()
+            || name_chars > 64
+            || character_name.chars().any(char::is_control)
+        {
+            return "Nome do personagem deve ter de 1 a 64 caracteres Unicode e não conter controles.".into();
+        }
+        if self.state.race_registry.get(race_id).is_none() {
+            return format!("Raça desconhecida: {race_id}");
+        }
+        if elements.len() > 2 {
+            return "Escolha no máximo dois elementos.".into();
+        }
+        let unique_elements = elements
+            .iter()
+            .copied()
+            .collect::<std::collections::BTreeSet<_>>();
+        if unique_elements.len() != elements.len() {
+            return "Não selecione o mesmo elemento duas vezes.".into();
+        }
+        if let Some(paths) = &self.state.paths {
+            let requested = save_name.to_lowercase();
+            let entries = match fs::read_dir(&paths.saves) {
+                Ok(entries) => entries,
+                Err(error) => {
+                    return format!("Não foi possível verificar saves existentes: {error}")
+                }
+            };
+            for entry in entries {
+                let entry = match entry {
+                    Ok(entry) => entry,
+                    Err(error) => {
+                        return format!("Não foi possível verificar saves existentes: {error}")
+                    }
+                };
+                let path = entry.path();
+                if path
+                    .extension()
+                    .is_some_and(|extension| extension.eq_ignore_ascii_case("zip"))
+                    && path
+                        .file_stem()
+                        .is_some_and(|stem| stem.to_string_lossy().to_lowercase() == requested)
+                {
+                    return format!("Um save chamado '{save_name}' já existe.");
+                }
+            }
+        }
+        let Some(mode) = self.state.game_modes.get(gamemode) else {
+            return format!("Unknown game mode {gamemode}");
         };
+        self.state.attribute_rules = mode
+            .resolve_numeric(&self.state.global_numeric)
+            .attribute_rules();
+        self.state.ruleset_version = mode.ruleset_version.clone();
+        self.state.combat = None;
+        self.opaque_mod_data.clear();
+        let mut player = match Entity::new(
+            match crate::content::StableId::new("base:player") {
+                Ok(id) => id,
+                Err(error) => return error,
+            },
+            character_name,
+            Allegiance::Player,
+            AttributeSet::default(),
+            &self.state.attribute_rules,
+        ) {
+            Ok(player) => player,
+            Err(error) => return error.to_string(),
+        };
+        player.race_id = crate::content::StableId::new(race_id).ok();
+        self.player = Some(player);
+        self.character = Some(PlayerCharacter {
+            race_id: race_id.to_owned(),
+            elements: unique_elements,
+            spells: Vec::new(),
+            inventory: Vec::new(),
+            equipment: BTreeMap::new(),
+        });
+        self.campaign = Some(CampaignProgress::prologue("core:prologue_work_exit"));
+        self.save_name = Some(save_name.to_owned());
+        self.gamemode_id = gamemode.to_owned();
+        self.state.rng = DeterministicRng::new(self.state.seed);
+        self.mode = AppMode::Ready;
+        self.dirty = true;
+        let saved = self.save();
+        if saved.starts_with("Failed") {
+            return saved;
+        }
+        format!("Personagem criado e salvo. Mecânicas raciais e quatro magias iniciais ainda não estão definidas; nenhuma foi inventada. {saved}")
+    }
+
+    fn advance_scene(&mut self) -> String {
+        let Some(mut progress) = self.campaign.clone() else {
+            return "Não há campanha ativa.".into();
+        };
+        let Some(scene_id) = progress.current_scene_id.clone() else {
+            return "Não há cena atual.".into();
+        };
+        let Some(scene) = self.state.scene_registry.get(&scene_id) else {
+            return format!("Cena ausente ou inválida: {scene_id}");
+        };
+        if let Err(error) = progress.apply_scene_events(&scene.completion_events) {
+            return error;
+        }
+        if let Some(next) = &scene.next {
+            progress.current_scene_id = Some(next.clone());
+        }
+        let completed = progress.prologue_completed;
+        self.campaign = Some(progress);
+        self.dirty = true;
+        let result = self.save();
+        if completed {
+            format!("Prólogo concluído. {result}")
+        } else {
+            format!("Cena avançada. {result}")
+        }
+    }
+
+    fn skip_prologue(&mut self) -> String {
+        let Some(mut progress) = self.campaign.clone() else {
+            return "Não há campanha ativa.".into();
+        };
+        if progress.prologue_completed {
+            return "O prólogo já foi concluído.".into();
+        }
+        let events = match campaign::prologue_completion_events(&self.state.scene_registry) {
+            Ok(events) => events,
+            Err(error) => return error,
+        };
+        if let Err(error) = progress.apply_scene_events(&events) {
+            return error;
+        }
+        self.campaign = Some(progress);
+        self.dirty = true;
+        let result = self.save();
+        format!("Prólogo pulado; campanha iniciada no dia 7 em Tidal Town. {result}")
+    }
+
+    fn move_to_location(&mut self, location_id: &str) -> String {
+        let Some(progress) = self.campaign.as_mut() else {
+            return "Não há campanha ativa.".into();
+        };
+        match campaign::move_campaign(progress, &self.state.location_registry, location_id) {
+            Ok(()) => {
+                self.dirty = true;
+                format!(
+                    "Você chegou a {}.",
+                    self.state
+                        .location_registry
+                        .get(location_id)
+                        .map(|value| value.name.as_str())
+                        .unwrap_or(location_id)
+                )
+            }
+            Err(error) => error,
+        }
+    }
+
+    fn request_load(&mut self, name: &str) -> String {
         if self.dirty {
             self.pending_load = Some((*name).into());
             return "Unsaved state will be replaced. Type 'confirm load' or 'cancel'.".to_owned();
@@ -265,6 +608,13 @@ impl App {
                 }
                 self.state.rng = DeterministicRng::new(save.metadata.rng_state);
                 self.state.ruleset_version = save.metadata.ruleset_version.clone();
+                self.opaque_mod_data = save.opaque_mod_data;
+                self.character = save.character;
+                self.campaign = save.campaign;
+                self.player = save
+                    .entities
+                    .into_iter()
+                    .find(|entity| entity.id.as_str() == "base:player");
                 self.gamemode_id = save.metadata.gamemode_id;
                 self.state.combat = save.combat;
                 if let Some(explanation) = self
@@ -422,10 +772,7 @@ impl App {
         lines.join("\n")
     }
 
-    fn use_action(&mut self, arguments: &[&str]) -> String {
-        let Some(action_id) = arguments.first() else {
-            return "Usage: use <action-id> [target-id...]".into();
-        };
+    fn use_action(&mut self, action_id: &str, requested_targets: &[String]) -> String {
         let Some(definition) = self.state.action_registry.get(action_id).cloned() else {
             return format!("Unknown action {action_id}");
         };
@@ -442,13 +789,10 @@ impl App {
         if definition.tags.iter().any(|tag| tag == "reaction") {
             return format!("Use 'reserve {action_id}' for reactions.");
         }
-        if action_id == &"base:flee" {
+        if action_id == "base:flee" {
             return self.flee();
         }
-        let mut target_ids = arguments[1..]
-            .iter()
-            .map(|value| (*value).to_owned())
-            .collect::<Vec<_>>();
+        let mut target_ids = requested_targets.to_vec();
         if definition.target.mode == TargetMode::SelfOnly && target_ids.is_empty() {
             target_ids.push("base:player".into());
         }
@@ -488,10 +832,7 @@ impl App {
         }
     }
 
-    fn reserve(&mut self, arguments: &[&str]) -> String {
-        let Some(reaction_id) = arguments.first() else {
-            return "Usage: reserve <reaction-id>".into();
-        };
+    fn reserve(&mut self, reaction_id: &str) -> String {
         let Some(definition) = self.state.action_registry.get(reaction_id).cloned() else {
             return format!("Unknown reaction {reaction_id}");
         };
@@ -683,15 +1024,21 @@ impl App {
         let Some(paths) = &self.state.paths else {
             return "Runtime paths are unavailable.".into();
         };
-        let entities = self
+        let mut entities: Vec<crate::entities::Entity> = self
             .state
             .combat
             .as_ref()
             .map(|combat| combat.entities.values().cloned().collect())
             .unwrap_or_default();
+        if self.state.combat.is_none() {
+            if let Some(player) = self.player.clone() {
+                entities.push(player);
+            }
+        }
         let data = SaveData {
             metadata: SaveMetadata {
                 save_format_version: SAVE_FORMAT_VERSION,
+                save_id: name.to_owned(),
                 ruleset_version: self.state.ruleset_version.clone(),
                 required_mods: self
                     .state
@@ -716,8 +1063,10 @@ impl App {
                 "attribute_rules": self.state.attribute_rules,
             }),
             entities,
+            character: self.character.clone(),
+            campaign: self.campaign.clone(),
             combat: self.state.combat.clone(),
-            opaque_mod_data: BTreeMap::new(),
+            opaque_mod_data: self.opaque_mod_data.clone(),
             migration_warnings: Vec::new(),
         };
         let path = paths.saves.join(format!("{name}.zip"));
@@ -733,20 +1082,6 @@ impl App {
                 format!("Saved {}.", path.display())
             }
             Err(error) => format!("Failed to save {}: {error}", path.display()),
-        }
-    }
-
-    fn set_log_mode(&mut self, arguments: &[&str]) -> String {
-        match arguments.first().copied() {
-            Some("normal") => {
-                self.verbose = false;
-                "Combat output set to normal.".into()
-            }
-            Some("verbose") => {
-                self.verbose = true;
-                "Combat output set to verbose.".into()
-            }
-            _ => "Usage: log normal|verbose".into(),
         }
     }
 
@@ -861,8 +1196,11 @@ impl App {
     }
 }
 
-fn load_mod_extensions(state: &mut GameState) -> Vec<ModRuntime> {
+fn load_mod_extensions(
+    state: &mut GameState,
+) -> (Vec<ModRuntime>, Vec<crate::modding::ModLoadFailure>) {
     let mut runtimes = Vec::new();
+    let mut failures = Vec::new();
     let roots = state.mod_roots.clone();
     for (mod_id, root) in roots {
         if let Some(logger) = &state.logger {
@@ -887,6 +1225,13 @@ fn load_mod_extensions(state: &mut GameState) -> Vec<ModRuntime> {
                         .into_iter()
                         .try_for_each(|definition| action_registry.register(definition))
                     {
+                        record_mod_failure(
+                            &mut failures,
+                            &mod_id,
+                            &action_path,
+                            "action content",
+                            error.to_string(),
+                        );
                         log_extension_error(
                             state,
                             &format!("Action content from {mod_id} failed: {error}"),
@@ -895,6 +1240,13 @@ fn load_mod_extensions(state: &mut GameState) -> Vec<ModRuntime> {
                     }
                 }
                 Err(error) => {
+                    record_mod_failure(
+                        &mut failures,
+                        &mod_id,
+                        &action_path,
+                        "action content",
+                        error.to_string(),
+                    );
                     log_extension_error(
                         state,
                         &format!("Action content {} failed: {error}", action_path.display()),
@@ -915,6 +1267,13 @@ fn load_mod_extensions(state: &mut GameState) -> Vec<ModRuntime> {
                         .into_iter()
                         .try_for_each(|definition| status_registry.register(definition))
                     {
+                        record_mod_failure(
+                            &mut failures,
+                            &mod_id,
+                            &status_path,
+                            "status content",
+                            error.to_string(),
+                        );
                         log_extension_error(
                             state,
                             &format!("Status content from {mod_id} failed: {error}"),
@@ -923,6 +1282,13 @@ fn load_mod_extensions(state: &mut GameState) -> Vec<ModRuntime> {
                     }
                 }
                 Err(error) => {
+                    record_mod_failure(
+                        &mut failures,
+                        &mod_id,
+                        &status_path,
+                        "status content",
+                        error.to_string(),
+                    );
                     log_extension_error(
                         state,
                         &format!("Status content {} failed: {error}", status_path.display()),
@@ -934,6 +1300,13 @@ fn load_mod_extensions(state: &mut GameState) -> Vec<ModRuntime> {
         let runtime = match ModRuntime::new(&mod_id, state.lua_max_instructions) {
             Ok(runtime) => runtime,
             Err(error) => {
+                record_mod_failure(
+                    &mut failures,
+                    &mod_id,
+                    &root,
+                    "Lua initialization",
+                    error.to_string(),
+                );
                 log_extension_error(
                     state,
                     &format!("Failed to initialize Lua for {mod_id}: {error}"),
@@ -947,6 +1320,13 @@ fn load_mod_extensions(state: &mut GameState) -> Vec<ModRuntime> {
             let source = match fs::read_to_string(&script) {
                 Ok(source) => source,
                 Err(error) => {
+                    record_mod_failure(
+                        &mut failures,
+                        &mod_id,
+                        &script,
+                        "Lua script",
+                        error.to_string(),
+                    );
                     log_extension_error(
                         state,
                         &format!(
@@ -959,6 +1339,13 @@ fn load_mod_extensions(state: &mut GameState) -> Vec<ModRuntime> {
                 }
             };
             if let Err(error) = runtime.load_script(&script.display().to_string(), &source) {
+                record_mod_failure(
+                    &mut failures,
+                    &mod_id,
+                    &script,
+                    "Lua script",
+                    error.to_string(),
+                );
                 log_extension_error(
                     state,
                     &format!(
@@ -983,10 +1370,19 @@ fn load_mod_extensions(state: &mut GameState) -> Vec<ModRuntime> {
                         .map_err(|error| error.to_string())
                 }) {
                 Ok(()) => {}
-                Err(error) => log_extension_error(
-                    state,
-                    &format!("Action registration from {mod_id} failed: {error}"),
-                ),
+                Err(error) => {
+                    record_mod_failure(
+                        &mut failures,
+                        &mod_id,
+                        &root,
+                        "action registration",
+                        error.clone(),
+                    );
+                    log_extension_error(
+                        state,
+                        &format!("Action registration from {mod_id} failed: {error}"),
+                    );
+                }
             }
         }
         for value in runtime.take_status_registrations() {
@@ -998,13 +1394,29 @@ fn load_mod_extensions(state: &mut GameState) -> Vec<ModRuntime> {
                         .map_err(|error| error.to_string())
                 }) {
                 Ok(()) => {}
-                Err(error) => log_extension_error(
-                    state,
-                    &format!("Status registration from {mod_id} failed: {error}"),
-                ),
+                Err(error) => {
+                    record_mod_failure(
+                        &mut failures,
+                        &mod_id,
+                        &root,
+                        "status registration",
+                        error.clone(),
+                    );
+                    log_extension_error(
+                        state,
+                        &format!("Status registration from {mod_id} failed: {error}"),
+                    );
+                }
             }
         }
         if let Err(error) = action_registry.validate(&status_registry) {
+            record_mod_failure(
+                &mut failures,
+                &mod_id,
+                &root,
+                "reference validation",
+                error.to_string(),
+            );
             log_extension_error(
                 state,
                 &format!("Reference validation for {mod_id} failed: {error}"),
@@ -1016,7 +1428,22 @@ fn load_mod_extensions(state: &mut GameState) -> Vec<ModRuntime> {
         runtime.set_world_snapshot(LuaWorldSnapshot::default());
         runtimes.push(runtime);
     }
-    runtimes
+    (runtimes, failures)
+}
+
+fn record_mod_failure(
+    failures: &mut Vec<crate::modding::ModLoadFailure>,
+    mod_id: &str,
+    path: &Path,
+    stage: &str,
+    reason: String,
+) {
+    failures.push(crate::modding::ModLoadFailure {
+        path: path.to_path_buf(),
+        mod_id: Some(mod_id.to_owned()),
+        stage: stage.to_owned(),
+        reason,
+    });
 }
 
 fn collect_files(root: &Path, extension: &str) -> Vec<std::path::PathBuf> {

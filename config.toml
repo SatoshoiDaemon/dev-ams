@@ -27,3 +27,6 @@ keep_crash_reports = 50
 
 [lua]
 max_instructions_per_callback = 100000
+
+[presentation]
+visual_effects = "reduced"

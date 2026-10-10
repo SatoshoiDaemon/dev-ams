@@ -16,6 +16,7 @@ path = "src/main.rs"
 
 [dependencies]
 crossterm = "0.28"
+ratatui = { version = "=0.28.1", default-features = false, features = ["crossterm"] }
 ctrlc = "3.4"
 # MSRV compatibility pin for the transitive TOML map implementation. Newer
 # IndexMap releases require Rust 2024/Cargo 1.85.

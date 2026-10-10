@@ -1,0 +1,10 @@
+[
+  {"id":"core:prologue_work_exit","text":"O expediente termina depois de mais um dia cansativo. Você sai do trabalho e segue para casa.","style":"narrative","auto_advance":false,"next":"core:prologue_truck","completion_events":[]},
+  {"id":"core:prologue_truck","text":"Enquanto olha as mensagens no celular, você ouve uma buzina. Uma luz intensa toma a rua. É um caminhão.","style":"narrative","auto_advance":false,"next":"core:prologue_death","completion_events":[]},
+  {"id":"core:prologue_death","text":"O impacto chega antes que você consiga reagir. Então, tudo fica escuro.","style":"narrative","auto_advance":false,"next":"core:prologue_ocean","completion_events":[]},
+  {"id":"core:prologue_ocean","text":"Você desperta em um espaço vazio, semelhante a um oceano sem horizonte.","style":"narrative","auto_advance":false,"next":"core:prologue_voice","completion_events":[]},
+  {"id":"core:prologue_voice","text":"Uma voz chama por você. As palavras chegam distantes e incompreensíveis.","style":"narrative","auto_advance":false,"next":"core:prologue_ritual_failure","completion_events":[]},
+  {"id":"core:prologue_ritual_failure","text":"O RITUAL FALHOU","style":"glitch","auto_advance":false,"next":"core:prologue_town_wake","completion_events":[]},
+  {"id":"core:prologue_town_wake","text":"Você desperta perto de uma pequena cidade. Ainda fraco e sem respostas, caminha em direção às primeiras casas.","style":"narrative","auto_advance":false,"next":"core:prologue_seven_days","completion_events":[]},
+  {"id":"core:prologue_seven_days","text":"7 dias depois","style":"title","auto_advance":false,"completion_events":["core:prologue_completed","core:campaign_day_7","core:move_to_tidal_town"]}
+]

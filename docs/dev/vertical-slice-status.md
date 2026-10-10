@@ -7,7 +7,25 @@
 ## Playable path
 
 Run `ams` from an installation root containing `config.toml`, `data/`, and
-`gamemodes/`. The terminal flow is:
+`gamemodes/` to open the keyboard-driven TUI. **Jogar** collects distinct save and
+character names, race, and up to two elemental affinities. The prologue is loaded
+from `data/content/scenes.json`; scene IDs and campaign flags persist after every
+advance. Completing or skipping it starts day 7 at `core:tidal_town`. Location
+choices come from `data/content/locations.json` and are validated by the engine.
+Character, inventory, spell, equipment, and location screens read campaign state.
+The Demon training encounter remains demonstration content and is still available
+through `ams --cli`.
+
+Save names accept Unicode and are validated as portable filename components. Save
+listing reads actual ZIP files only; character name/race appear only when present
+in stored player-entity data. Campaign saves use format v3, with `character.json`
+and `campaign.json`; writes stage a completed temporary archive before replacement.
+v1/v2 saves remain readable and load as their existing demonstration state. Mod
+management is read-only:
+it displays discovered manifest metadata and actual loading/validation errors; it
+does not offer fictitious enable/disable actions.
+
+The CLI demonstration flow is:
 
 ```text
 new demo base:standard
@@ -36,10 +54,10 @@ versioned demonstration content, not global racial defaults.
 | Statuses | The base catalog is loaded from `data/content/statuses.json`; competition, Resistance, ticks, decay, removal, immunity, and Dark Flame DoT priority use generic engine primitives. |
 | Demon | Tag-driven Dread of Society, seven per-combat Hearts, exact half-HP crossing, Shield/debuff response, Dark Flame immunity, and the two racial spell templates. There is no `match Race::Demon`. |
 | Mods and Lua | Deterministic discovery, dependency blocking, isolated load failures, one sandboxed Lua 5.4 runtime per mod, load-time registration, copied queries, queued `EngineCommand` mutations, namespaced listeners, stable listener order, and a configurable instruction budget. IO, OS, package, debug, native loading, network, and shell access are absent. |
-| Persistence | Save format v2 ZIP with `metadata.json`, `ruleset.json`, `entities.json`, optional `combat.json`, and `mod_data.json`; active combat and `explain last` round-trip. V1 loads without combat, preserves entities/mod data, and reports the missing ruleset snapshot. |
+| Persistence | Save format v3 ZIP with metadata, ruleset, entities, optional character/campaign/combat entries, and mod data; campaign, active combat and `explain last` round-trip. V1/V2 migrate without fabricated campaign state. |
 | Configuration | Compiled safe defaults → `config.toml` → gamemode by internal ID → saved ruleset snapshot. `base:standard` ships in `gamemodes/standard.toml`. |
 | Diagnostics | `latest.log`, timestamped session logs, severity levels, contextual fields, retention, panic reports under `logs/crashes/`, and normal/verbose combat output. No diagnostic is transmitted. |
-| Terminal | Menu, ready, and combat commands over stdin/stdout. Invalid commands do not mutate simulation state. Unsaved replacement/quit requires confirmation; Ctrl+C offers the save-or-discard path. |
+| Terminal | Ratatui/Crossterm TUI by default, with character creation, prologue controls, exploration, profile views, saves/mods, credits, and combat navigation; `--cli` preserves the line-oriented demonstration interface. Simulation actions are typed and engine-validated. Unsaved quit requires confirmation. RAII restores raw mode, cursor, and alternate screen. |
 | Portability | Rust 1.80 CI on Windows/Linux, static `x86_64-unknown-linux-musl`, portable packaging scripts, and copied-artifact smoke tests. Lua is vendored. |
 
 ## Decisions closed by this milestone
@@ -58,7 +76,7 @@ versioned demonstration content, not global racial defaults.
 - Base content and the Demon demonstration use the same registries, events, data
   schemas, and controlled Lua-facing commands available to mods. Replacement of a
   stable ID must be explicit.
-- Lua API v1, save format v2, configuration precedence, diagnostics, CLI commands,
+- Lua API v1, save format v3, configuration precedence, diagnostics, CLI commands,
   and the portable installed layout are defined and implemented for this slice.
 
 ## Deliberately partial inside the slice
@@ -77,10 +95,12 @@ versioned demonstration content, not global racial defaults.
 
 ## Future systems
 
-Exploration, open world, Human, Angel, Elf, Feral, Dragonborn, full progression,
-general inventory, crafting, economy, alchemy, companions, fast travel, and endgame
-remain specifications or future work. Their documentation must not be read as an
-implementation-status claim.
+Full progression, general inventory behavior, crafting, economy, alchemy,
+companions, fast travel, and endgame remain specifications or future work. Race
+passives and the four starter spells have no design definitions yet and are not
+invented by character creation. Until the initial attribute distribution is
+defined, created characters use the engine's existing zero-valued default
+attributes and derive resource pools from the selected ruleset.
 
 ## Open work after this milestone
 
@@ -89,6 +109,8 @@ implementation-status claim.
   need execution and artifact inspection on the remote CI runners.
 - `ActionRequirement` must gain equipment, element, catalyst, learned-node, and
   Fighting Style validators when those owning systems become executable.
+- Define the initial attribute distribution and four standard Node-built spell
+  definitions before calling new campaign creation feature-complete.
 - Inventory/equipment will be the first live subsystem to consume
   `UnresolvedContentReference`; opaque missing-mod data is already preserved.
 - The Glyph registry and spell-template contract are present, but executable

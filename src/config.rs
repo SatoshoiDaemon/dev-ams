@@ -30,6 +30,7 @@ pub struct AppConfig {
     pub numeric: NumericConfig,
     pub logging: LoggingConfig,
     pub lua: LuaConfig,
+    pub presentation: PresentationConfig,
 }
 impl Default for AppConfig {
     fn default() -> Self {
@@ -41,6 +42,7 @@ impl Default for AppConfig {
             numeric: NumericConfig::default(),
             logging: LoggingConfig::default(),
             lua: LuaConfig::default(),
+            presentation: PresentationConfig::default(),
         }
     }
 }
@@ -100,7 +102,29 @@ impl AppConfig {
                 reason: "must be greater than zero".into(),
             });
         }
+        if !matches!(
+            self.presentation.visual_effects.as_str(),
+            "full" | "reduced" | "off"
+        ) {
+            return Err(ConfigError::Validation {
+                field: "presentation.visual_effects",
+                reason: "expected full, reduced, or off".into(),
+            });
+        }
         Ok(())
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(default)]
+pub struct PresentationConfig {
+    pub visual_effects: String,
+}
+impl Default for PresentationConfig {
+    fn default() -> Self {
+        Self {
+            visual_effects: "reduced".into(),
+        }
     }
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]

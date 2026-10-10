@@ -241,6 +241,7 @@ fn active_combat_save_round_trip_preserves_cast_status_rng_and_explanation() {
     let save = SaveData {
         metadata: SaveMetadata {
             save_format_version: SAVE_FORMAT_VERSION,
+            save_id: "cast".into(),
             ruleset_version: "base:standard@1".into(),
             required_mods: Vec::new(),
             gamemode_id: "base:standard".into(),
@@ -249,6 +250,8 @@ fn active_combat_save_round_trip_preserves_cast_status_rng_and_explanation() {
         },
         ruleset: json!({"attribute_rules": rules}),
         entities: session.entities.values().cloned().collect(),
+        character: None,
+        campaign: None,
         combat: Some(session.clone()),
         opaque_mod_data: BTreeMap::from([("missing:mod".into(), json!({"kept": true}))]),
         migration_warnings: Vec::new(),

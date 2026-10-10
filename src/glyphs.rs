@@ -33,6 +33,42 @@ pub enum Element {
     Lightning,
 }
 
+impl Element {
+    pub const ALL: [Self; 13] = [
+        Self::Fire,
+        Self::Water,
+        Self::Earth,
+        Self::Air,
+        Self::Light,
+        Self::Darkness,
+        Self::Poison,
+        Self::Ice,
+        Self::Sound,
+        Self::Metal,
+        Self::Plant,
+        Self::Lava,
+        Self::Lightning,
+    ];
+
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Fire => "Fogo",
+            Self::Water => "Água",
+            Self::Earth => "Terra",
+            Self::Air => "Ar",
+            Self::Light => "Luz",
+            Self::Darkness => "Trevas",
+            Self::Poison => "Veneno",
+            Self::Ice => "Gelo",
+            Self::Sound => "Som",
+            Self::Metal => "Metal",
+            Self::Plant => "Plantas",
+            Self::Lava => "Lava",
+            Self::Lightning => "Raio",
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct GlyphCard {
     pub id: String,

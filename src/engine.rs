@@ -1,3 +1,4 @@
+use crate::campaign::{LocationRegistry, RaceRegistry, SceneRegistry};
 use crate::{
     actions::ActionRegistry,
     attributes::AttributeRules,
@@ -9,6 +10,7 @@ use crate::{
     glyphs::GlyphRegistry,
     logging::Logger,
     magic::SpellTemplateRegistry,
+    modding::ModLoadReport,
     session::CombatSession,
 };
 use std::collections::BTreeMap;
@@ -27,6 +29,7 @@ pub struct GameState {
     pub status_registry: StatusRegistry,
     pub glyph_registry: GlyphRegistry,
     pub loaded_mods: Vec<String>,
+    pub mod_load_report: ModLoadReport,
     pub mod_roots: BTreeMap<String, PathBuf>,
     pub ruleset_version: String,
     pub action_registry: ActionRegistry,
@@ -39,6 +42,10 @@ pub struct GameState {
     pub loaded_mod_versions: BTreeMap<String, String>,
     pub paths: Option<GamePaths>,
     pub logger: Option<Logger>,
+    pub scene_registry: SceneRegistry,
+    pub location_registry: LocationRegistry,
+    pub race_registry: RaceRegistry,
+    pub visual_effects: String,
 }
 impl GameState {
     pub fn new(seed: u64) -> Self {
@@ -53,6 +60,7 @@ impl GameState {
             status_registry: StatusRegistry::base(),
             glyph_registry: GlyphRegistry::default(),
             loaded_mods: Vec::new(),
+            mod_load_report: ModLoadReport::default(),
             mod_roots: BTreeMap::new(),
             ruleset_version: "base:standard@1".into(),
             action_registry: ActionRegistry::default(),
@@ -65,6 +73,10 @@ impl GameState {
             loaded_mod_versions: BTreeMap::new(),
             paths: None,
             logger: None,
+            scene_registry: SceneRegistry::default(),
+            location_registry: LocationRegistry::default(),
+            race_registry: RaceRegistry::default(),
+            visual_effects: "reduced".into(),
         }
     }
     pub fn emit(&mut self, event: GameEvent) {

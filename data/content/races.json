@@ -1,0 +1,8 @@
+[
+  {"id":"base:human","name":"Humano","description":"As mecânicas específicas desta raça ainda estão em desenvolvimento."},
+  {"id":"base:demon","name":"Demônio","description":"As mecânicas específicas desta raça ainda estão em desenvolvimento."},
+  {"id":"base:angel","name":"Anjo","description":"As mecânicas específicas desta raça ainda estão em desenvolvimento."},
+  {"id":"base:elf","name":"Elfo","description":"As mecânicas específicas desta raça ainda estão em desenvolvimento."},
+  {"id":"base:feral","name":"Feral","description":"As mecânicas específicas desta raça ainda estão em desenvolvimento."},
+  {"id":"base:draconato","name":"Draconato","description":"As mecânicas específicas desta raça ainda estão em desenvolvimento."}
+]

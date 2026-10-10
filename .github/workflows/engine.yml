@@ -47,7 +47,7 @@ jobs:
       - name: Smoke-test copied Windows artifact
         if: runner.os == 'Windows'
         shell: pwsh
-        run: "'quit' | ./dist/ams-windows-x86_64/ams.exe"
+        run: "'quit' | ./dist/ams-windows-x86_64/ams.exe --cli"
 
   linux-musl:
     name: Static Linux x86_64 musl
@@ -73,4 +73,4 @@ jobs:
       - name: Assemble portable Linux artifact
         run: sh scripts/package.sh x86_64-unknown-linux-musl --skip-build
       - name: Smoke-test copied Linux artifact
-        run: printf 'quit\n' | ./dist/ams-x86_64-unknown-linux-musl/ams
+        run: printf 'quit\n' | ./dist/ams-x86_64-unknown-linux-musl/ams --cli

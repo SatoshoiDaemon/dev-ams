@@ -111,7 +111,7 @@ Every save records at least:
 
 ```json
 {
-  "save_format_version": 2,
+  "save_format_version": 3,
   "ruleset_version": "..."
 }
 ```
@@ -364,9 +364,11 @@ arbitrary Rust access.
 
 ### Save archive layout
 
-Save format v2 contains `metadata.json`, `ruleset.json`, `entities.json`, optional
-`combat.json`, and `mod_data.json`. Later systems may add versioned entries, but must
-preserve the human-readable, editable ownership contract and ordered migrations.
+Save format v3 contains `metadata.json`, `ruleset.json`, `entities.json`, optional
+`character.json`, `campaign.json`, and `combat.json`, plus `mod_data.json`. Campaign
+location and narrative progress use stable IDs. Writes stage a complete temporary
+ZIP before replacing the target. V1/V2 saves migrate without synthetic character or
+campaign data and retain their demonstration behavior.
 
 ### Tests and balance validation
 

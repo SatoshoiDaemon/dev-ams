@@ -2,6 +2,7 @@
 pub mod actions;
 pub mod app;
 pub mod attributes;
+pub mod campaign;
 pub mod combat;
 pub mod config;
 pub mod content;
@@ -21,6 +22,7 @@ pub mod saves;
 pub mod scaling;
 pub mod session;
 pub mod terminal;
+pub mod tui;
 pub use config::{AppConfig, GamePaths};
 pub use engine::{GameEvent, GameState};
 use std::path::Path;
@@ -66,12 +68,14 @@ pub fn initialize(root: impl AsRef<Path>) -> Result<GameState, anyhowless::Error
     state.logger = Some(logger.clone());
     state.global_numeric = config.numeric.clone();
     state.lua_max_instructions = config.lua.max_instructions_per_callback;
+    state.visual_effects = config.presentation.visual_effects.clone();
     state.attribute_rules = resolved_numeric.attribute_rules();
     state.ruleset_version = standard_mode
         .map(|mode| mode.ruleset_version.clone())
         .unwrap_or_else(|| config.ruleset_version.clone());
     state.game_modes = game_modes;
     state.glyph_registry = glyph_registry;
+    state.mod_load_report = mod_report.clone();
     let content_root = paths.data.join("content");
     let status_path = content_root.join("statuses.json");
     logger.info(&format!("Loading {}", status_path.display()))?;
@@ -91,6 +95,27 @@ pub fn initialize(root: impl AsRef<Path>) -> Result<GameState, anyhowless::Error
         &state.action_registry,
         &state.glyph_registry,
     )?;
+    logger.info(&format!(
+        "Loading {}",
+        content_root.join("scenes.json").display()
+    ))?;
+    state.scene_registry =
+        campaign::SceneRegistry::new(load_content_json(&content_root.join("scenes.json"))?)
+            .map_err(anyhowless::Error::Campaign)?;
+    logger.info(&format!(
+        "Loading {}",
+        content_root.join("locations.json").display()
+    ))?;
+    state.location_registry =
+        campaign::LocationRegistry::new(load_content_json(&content_root.join("locations.json"))?)
+            .map_err(anyhowless::Error::Campaign)?;
+    logger.info(&format!(
+        "Loading {}",
+        content_root.join("races.json").display()
+    ))?;
+    state.race_registry =
+        campaign::RaceRegistry::new(load_content_json(&content_root.join("races.json"))?)
+            .map_err(anyhowless::Error::Campaign)?;
     state.loaded_mods = mod_report
         .loaded
         .iter()
@@ -130,6 +155,7 @@ pub mod anyhowless {
         Encounter(Box<crate::encounters::EncounterError>),
         Status(Box<crate::effects::StatusError>),
         SpellTemplate(Box<crate::magic::SpellTemplateError>),
+        Campaign(String),
     }
     impl fmt::Display for Error {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -142,6 +168,7 @@ pub mod anyhowless {
                 Self::Encounter(e) => e.fmt(f),
                 Self::Status(e) => e.fmt(f),
                 Self::SpellTemplate(e) => e.fmt(f),
+                Self::Campaign(e) => f.write_str(e),
             }
         }
     }
@@ -186,4 +213,21 @@ pub mod anyhowless {
             Self::SpellTemplate(Box::new(e))
         }
     }
+}
+
+fn load_content_json<T: serde::de::DeserializeOwned>(
+    path: &std::path::Path,
+) -> Result<T, anyhowless::Error> {
+    let text = std::fs::read_to_string(path).map_err(|error| {
+        anyhowless::Error::Campaign(format!(
+            "failed to read campaign content {}: {error}",
+            path.display()
+        ))
+    })?;
+    serde_json::from_str(&text).map_err(|error| {
+        anyhowless::Error::Campaign(format!(
+            "invalid campaign content {}: {error}",
+            path.display()
+        ))
+    })
 }

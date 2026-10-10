@@ -1,4 +1,5 @@
 fn main() {
+    let cli_mode = std::env::args().skip(1).any(|argument| argument == "--cli");
     let root = std::env::current_exe()
         .ok()
         .and_then(|executable| executable.parent().map(std::path::Path::to_path_buf))
@@ -8,7 +9,12 @@ fn main() {
     match ams::initialize(root) {
         Ok(state) => {
             let mut app = ams::app::App::new(state);
-            if let Err(error) = app.run() {
+            let result = if cli_mode {
+                app.run()
+            } else {
+                ams::tui::run(app)
+            };
+            if let Err(error) = result {
                 eprintln!("A Magic Sovereign terminal error: {error}");
                 std::process::exit(1);
             }
