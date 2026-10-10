@@ -34,10 +34,12 @@ jobs:
         run: rustup toolchain install 1.80.0 --profile minimal --component rustfmt,clippy
       - name: Check formatting
         run: cargo +1.80.0 fmt --all -- --check
+      - name: Check all targets and features
+        run: cargo +1.80.0 check --all-targets --all-features --locked
       - name: Check warnings
-        run: cargo +1.80.0 clippy --all-targets --locked -- -D warnings
+        run: cargo +1.80.0 clippy --all-targets --all-features --locked -- -D warnings
       - name: Run tests
-        run: cargo +1.80.0 test --all-targets --locked
+        run: cargo +1.80.0 test --all-targets --all-features --locked
       - name: Build release executable
         run: cargo +1.80.0 build --release --locked
       - name: Assemble portable Windows artifact

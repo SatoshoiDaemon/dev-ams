@@ -10,6 +10,22 @@
 - Erros: `thiserror` em fronteiras de dados, com caminho, arquivo e causa contextualizados.
 - Números: inteiros para estado persistente e uma função central de `floor` para resultados fracionários. O RNG inicial é um XorShift determinístico com seed explícita.
 
+## Organização dos módulos
+
+`src/lib.rs` é a raiz da biblioteca e declara a API pública; `src/main.rs` é o
+ponto de entrada do executável. As implementações dos módulos ficam em
+diretórios `src/<módulo>/`, normalmente em `mod.rs`. Os caminhos públicos já
+existentes, como `ams::combat` e `ams::saves`, são preservados pela declaração
+dos módulos na raiz da biblioteca.
+
+A migração para esses diretórios foi estrutural. Ela não dividiu internamente
+`combat`, `engine`, `magic` ou outros módulos. Uma divisão futura deve seguir
+responsabilidades reais, sem gerar arquivos, diretórios ou camadas artificiais.
+CLI e TUI reutilizam a mesma aplicação e os mesmos sistemas de jogo. Estado,
+regras e resultados devem permanecer independentes da apresentação; modding,
+conteúdo data-driven, operação offline e propriedade local dos dados continuam
+sendo requisitos arquiteturais.
+
 ## Inicialização
 
 `ams::initialize(root)` carrega `config.toml`, resolve caminhos relativos à raiz da instalação, cria `saves/`, `mods/`, `data/`, `gamemodes/` e `logs/`, e abre `logs/latest.log`.

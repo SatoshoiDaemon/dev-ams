@@ -330,6 +330,14 @@ terminal ─> app ─> systems ─> engine/state
                     └──── interfaces ────┘
 ```
 
+`src/lib.rs` is the library root and public API surface; `src/main.rs` is the
+binary entry point. Module implementations are organized under
+`src/<module>/mod.rs`, while the declared public paths remain stable. The move
+into directories was structural only; it did not require internal decomposition
+of large modules. CLI and TUI are consumers of shared application and system
+logic. Keep core systems independent from presentation and keep modding as a
+first-class constraint when extending these boundaries.
+
 The following ownership must be explicit:
 
 - `engine/state`: entity IDs, world state, resources, clocks, RNG, and generic

@@ -22,7 +22,18 @@ Python and the CI environment are contributor tools. They are not dependencies o
 
 ## Rust build checks
 
-`.github/workflows/engine.yml` uses the declared Rust 1.80 MSRV to run formatting, Clippy with warnings denied, all targets/tests, and release builds on Windows and Linux. A separate Linux job installs `musl-tools`, builds `x86_64-unknown-linux-musl`, and rejects an executable containing a dynamic program interpreter. `Cargo.lock` is tracked for reproducible application builds.
+`.github/workflows/engine.yml` uses the declared Rust 1.80 MSRV to run formatting,
+`cargo check --all-targets --all-features`, tests for all targets and features,
+and Clippy for all targets and features with warnings denied. It also builds
+release executables on Windows and Linux. A separate Linux job installs
+`musl-tools`, builds `x86_64-unknown-linux-musl`, and rejects an executable
+containing a dynamic program interpreter. `Cargo.lock` is tracked for
+reproducible application builds.
+
+Rust's module resolver and the compilation checks validate declared module
+paths and reject conflicting `foo.rs`/`foo/mod.rs` definitions. No separate
+directory allowlist is used: legitimate crate-root Rust files are allowed, and
+new module directories are added only when they represent real responsibilities.
 
 Release publishing is still separate from CI validation. `scripts/package.ps1` and `scripts/package.sh` assemble the portable directory with the executable, license, configuration, data, gamemodes, and visible `saves/mods/logs` directories. CI launches the executable from that copied directory; the musl job also verifies that the Linux executable has no dynamic program interpreter.
 

@@ -36,8 +36,9 @@ The project MSRV is Rust 1.80. From the repository root:
 
 ```sh
 cargo fmt --all -- --check
-cargo clippy --all-targets --locked -- -D warnings
-cargo test --all-targets --locked
+cargo check --all-targets --all-features --locked
+cargo test --all-targets --all-features --locked
+cargo clippy --all-targets --all-features --locked -- -D warnings
 cargo build --release --locked
 ```
 

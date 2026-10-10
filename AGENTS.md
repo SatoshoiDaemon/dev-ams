@@ -149,6 +149,26 @@ Terminal Presentation
 
 Game rules should live in reusable systems/modules rather than inside UI code.
 
+The Rust crate keeps `src/lib.rs` as the library root and the public API
+surface. `src/main.rs` is the executable entry point. Implemented modules live
+in responsibility-named `src/<module>/` directories (normally in `mod.rs`),
+while legitimate crate-root files such as these two remain at the root. The
+file move into directories was a structural migration; it did not require
+splitting the contents of each module into submodules.
+
+The current dependency direction is:
+
+```text
+terminal / TUI → app → game systems → engine state
+                  content, persistence, and modding through explicit interfaces
+```
+
+CLI and TUI are consumers of the same application and game systems. Keep
+simulation and gameplay rules independent of either interface, and avoid
+duplicating rules in presentation or command-routing code. Modding is a core
+architectural requirement: preserve data-driven content, the explicit Lua API,
+and the player's ability to inspect and edit local data.
+
 Examples:
 
 ```text
@@ -174,7 +194,27 @@ src/
 └── data/
 ```
 
-This is a guideline rather than a mandatory exact directory structure.
+This is a guideline rather than a mandatory exact directory structure. It is
+not a requirement to create every listed directory or to move every Rust file
+out of the crate root. Organize implemented modules by real responsibility and
+preserve existing public paths such as `ams::combat` and `ams::saves` when
+moving their source files.
+
+## Module maintenance
+
+1. Add new behavior to the module that owns that responsibility; CLI and TUI
+   should call the same game systems.
+2. Do not let `mod.rs` become an indiscriminate collection of unrelated logic.
+   Split a large module into submodules when its actual responsibilities justify
+   the split.
+3. Do not add directories or abstraction layers merely to match an idealized
+   diagram.
+4. Preserve public module paths and APIs, or document an intentional breaking
+   change explicitly.
+5. Keep dependency direction clear and avoid circular dependencies between
+   systems.
+6. Preserve the offline-first runtime, data-driven content, modding support,
+   and player ownership of saves, configuration, and mods.
 
 Preserve clear boundaries between:
 
